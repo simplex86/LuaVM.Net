@@ -30,45 +30,46 @@ namespace LuaVM.Net.Core
         public const int OP_DIV         = 19;   // /
         public const int OP_IDIV        = 20;   // //
         public const int OP_POW         = 21;   // ^
-        public const int OP_BIT_AND     = 22;   // &
-        public const int OP_BIT_OR      = 23;   // |
-        public const int OP_BIT_SHR     = 24;   // >>
-        public const int OP_BIT_SHL     = 25;   // <<
-        public const int OP_CONCAR      = 26;   // ..
-        public const int OP_LT          = 27;   // <
-        public const int OP_LE          = 28;   // <=
-        public const int OP_GT          = 29;   // >
-        public const int OP_GE          = 30;   // >=
-        public const int OP_EQ          = 31;   // ==
-        public const int OP_NE          = 32;   // ~=
-        public const int OP_LEN         = 33;   // #
-        public const int OP_AND         = 34;   // and
-        public const int OP_OR          = 35;   // or
-        public const int OP_NOT         = 36;   // not
+        public const int OP_MOD         = 22;   // %
+        public const int OP_BIT_AND     = 23;   // &
+        public const int OP_BIT_OR      = 24;   // |
+        public const int OP_BIT_SHR     = 25;   // >>
+        public const int OP_BIT_SHL     = 26;   // <<
+        public const int OP_CONCAT      = 27;   // ..
+        public const int OP_LT          = 28;   // <
+        public const int OP_LE          = 29;   // <=
+        public const int OP_GT          = 30;   // >
+        public const int OP_GE          = 31;   // >=
+        public const int OP_EQ          = 32;   // ==
+        public const int OP_NE          = 33;   // ~=
+        public const int OP_LEN         = 34;   // #
+        public const int OP_AND         = 35;   // and
+        public const int OP_OR          = 36;   // or
+        public const int OP_NOT         = 37;   // not
 
-        public const int KW_BREAK       = 37;   // break
-        public const int KW_DO          = 38;   // do
-        public const int KW_ELSE        = 39;   // else
-        public const int KW_ELSEIF      = 40;   // elseif
-        public const int KW_END         = 41;   // end
-        public const int KW_FALSE       = 42;   // false
-        public const int KW_FOR         = 43;   // for
-        public const int KW_FUNCTION    = 44;   // function
-        public const int KW_GOTO        = 45;   // goto
-        public const int KW_IF          = 46;   // if
-        public const int KW_IN          = 47;   // in
-        public const int KW_LOCAL       = 48;   // local
-        public const int KW_NIL         = 49;   // nil
-        public const int KW_REPEAT      = 50;   // repeat
-        public const int KW_RETURN      = 51;   // return
-        public const int KW_THEN        = 52;   // then
-        public const int KW_TRUE        = 53;   // true
-        public const int KW_UNTIL       = 54;   // until
-        public const int KW_WHILE       = 55;   // while
+        public const int KW_BREAK       = 38;   // break
+        public const int KW_DO          = 39;   // do
+        public const int KW_ELSE        = 40;   // else
+        public const int KW_ELSEIF      = 41;   // elseif
+        public const int KW_END         = 42;   // end
+        public const int KW_FALSE       = 43;   // false
+        public const int KW_FOR         = 44;   // for
+        public const int KW_FUNCTION    = 45;   // function
+        public const int KW_GOTO        = 46;   // goto
+        public const int KW_IF          = 47;   // if
+        public const int KW_IN          = 48;   // in
+        public const int KW_LOCAL       = 49;   // local
+        public const int KW_NIL         = 50;   // nil
+        public const int KW_REPEAT      = 51;   // repeat
+        public const int KW_RETURN      = 52;   // return
+        public const int KW_THEN        = 53;   // then
+        public const int KW_TRUE        = 54;   // true
+        public const int KW_UNTIL       = 55;   // until
+        public const int KW_WHILE       = 56;   // while
 
-        public const int IDENTIFIER     = 56;   // identifier
-        public const int NUMBER         = 57;   // number literal
-        public const int STRING         = 58;   // string literal
+        public const int IDENTIFIER     = 57;   // identifier
+        public const int NUMBER         = 58;   // number literal
+        public const int STRING         = 59;   // string literal
 
         public const int OP_UNM         = 15;   // unary minus
         public const int OP_SUB         = 15;   // 
