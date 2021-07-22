@@ -189,7 +189,7 @@ namespace LuaVM.Net.Core
                 Error($"unexpected symbol near {c}");
             }
 
-            return new Token(TokenType.EOF, "EOF", line);
+            return new Token(TokenType.EOF, "eof", line);
         }
 
         // 跳过空格、制表符、注释、换行等空白字符

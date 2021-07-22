@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.IO;
 using LuaVM.Net.Core;
 
 namespace LuaVM.Net
@@ -11,12 +8,23 @@ namespace LuaVM.Net
     {
         static void Main(string[] args)
         {
-            string lua  = "--[[\n";
-                   lua += "    print\n";
-                   lua += "]]\n";
-                   lua += "print(\"hello world\")";
+            var rootpath = GetProjectPath();
+            LoadFile(Path.Combine(rootpath, @"Luas\01.lua"));
+            // pause
+            Console.ReadKey();
+        }
 
-            var lexer = new Lexer("test.lua", lua, 1);
+        // 加载lua文件
+        static void LoadFile(string fullname)
+        {
+            string lua = File.ReadAllText(fullname);
+            if (string.IsNullOrEmpty(lua))
+            {
+                Console.WriteLine("Warning: file is empty");
+                return;
+            }
+
+            var lexer = new Lexer(fullname, lua, 1);
             while (true)
             {
                 var token = lexer.NextToken();
@@ -25,8 +33,12 @@ namespace LuaVM.Net
                 if (token.type == TokenType.EOF)
                     break;
             }
+        }
 
-            Console.ReadKey();
+        // 获取工程路径
+        static string GetProjectPath()
+        {
+            return Directory.GetParent(Environment.CurrentDirectory).Parent.Parent.FullName;
         }
     }
 }
