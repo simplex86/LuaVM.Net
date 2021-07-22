@@ -45,7 +45,7 @@
   <ItemGroup>
     <Compile Include="Core\Const.cs" />
     <Compile Include="Core\Lexer\Lexer.cs" />
-    <Compile Include="Core\Lexer\LexerData.cs" />
+    <Compile Include="Core\Lexer\Token.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

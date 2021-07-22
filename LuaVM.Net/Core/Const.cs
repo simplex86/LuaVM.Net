@@ -106,7 +106,7 @@ namespace LuaVM.Net.Core
         };
 
         // 是否包含
-        public static bool Contains(string word)
+        public static bool Has(string word)
         {
             return keywords.ContainsKey(word);
         }
@@ -114,7 +114,7 @@ namespace LuaVM.Net.Core
         // 获取值
         public static int Get(string word)
         {
-            if (Contains(word))
+            if (Has(word))
             {
                 return keywords[word];
             }
