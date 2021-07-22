@@ -228,7 +228,13 @@ namespace LuaVM.Net.Core
             Skip(2);
             if (chunk.StartsWith("["))
             {
-                // 长注释，TODO
+                // 长注释
+                var match = Regex.Match(chunk, "^\\[=*\\[");
+                if (match.Success)
+                {
+                    ScanLongString();
+                    return;
+                }
             }
             // 短注释
             while (chunk.Length > 0 && !IsNewLine(chunk[0]))
@@ -263,14 +269,14 @@ namespace LuaVM.Net.Core
         // 长字符串字面量
         private string ScanLongString()
         {
-            var matches = Regex.Matches(chunk, "^\\[=*\\[");
-            if (matches.Count == 0)
+            var match = Regex.Match(chunk, "^\\[=*\\[");
+            if (!match.Success)
             {
                 Error("");
                 return string.Empty;
             }
 
-            var openingLongBracket = matches[0].Value;
+            var openingLongBracket = match.Value;
             var closingLongBracket = openingLongBracket.Replace("[", "]");
             var closingLongBracketIndex = chunk.IndexOf(closingLongBracket);
 
@@ -297,14 +303,14 @@ namespace LuaVM.Net.Core
         // 短字符串字面量
         private string ScanShortString()
         {
-            var matches = Regex.Matches(chunk, "([\'\"])(?:\\\\(?:\r\n |[\\s\\S])|[^\\\\\r\n])*?\\1");
-            if (matches.Count == 0)
+            var match = Regex.Match(chunk, "([\'\"])(?:\\\\(?:\r\n |[\\s\\S])|[^\\\\\r\n])*?\\1");
+            if (!match.Success)
             {
                 Error("");
                 return string.Empty;
             }
 
-            var str = matches[0].Value;
+            var str = match.Value;
             Skip(str.Length);
             str = str.Substring(1, str.Length - 2);
 

@@ -11,7 +11,10 @@ namespace LuaVM.Net
     {
         static void Main(string[] args)
         {
-            string lua = "print(\"hello world\")";
+            string lua  = "--[[\n";
+                   lua += "    print\n";
+                   lua += "]]\n";
+                   lua += "print(\"hello world\")";
 
             var lexer = new Lexer("test.lua", lua, 1);
             while (true)
