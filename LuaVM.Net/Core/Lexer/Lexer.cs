@@ -192,6 +192,18 @@ namespace LuaVM.Net.Core
             return new Token(TokenType.EOF, "eof", line);
         }
 
+        // 下一个指定类型的token
+        public Token NextTokenOfType(int type)
+        {
+            var token = NextToken();
+            if (token.type != type)
+            {
+                Error($"syntax error near \'{token.text}\'");
+            }
+
+            return token;
+        }
+
         // 跳过空格、制表符、注释、换行等空白字符
         private void SkipWhiteSpace()
         {
