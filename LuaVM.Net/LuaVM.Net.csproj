@@ -49,8 +49,9 @@
     <Compile Include="Core\Const.cs" />
     <Compile Include="Core\Lexer\Lexer.cs" />
     <Compile Include="Core\Lexer\Token.cs" />
-    <Compile Include="Core\Parser\Imps\EmptyStatementParser.cs" />
     <Compile Include="Core\Parser\Imps\IBaseParser.cs" />
+    <Compile Include="Core\Parser\Imps\ParserFactory.cs" />
+    <Compile Include="Core\Parser\Imps\ParserImps.cs" />
     <Compile Include="Core\Parser\Parser.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

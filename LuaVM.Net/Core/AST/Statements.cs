@@ -19,25 +19,45 @@ namespace LuaVM.Net.Core
     // break
     public class BreakStatement : Statement
     {
-        public int line { get; set; } = 0; 
+        public int line { get; private set; } = 0; 
+
+        public BreakStatement(int line)
+        {
+            this.line = line;
+        }
     }
 
     // 标签
     public class LabelStatement : Statement
     {
-        public string name { get; set; } = string.Empty;
+        public string name { get; private set; } = string.Empty;
+
+        public LabelStatement(string name)
+        {
+            this.name = name;
+        }
     }
 
     // goto
     public class GotoStatement : Statement
     {
-        public string name { get; set; } = string.Empty;
+        public string name { get; private set; } = string.Empty;
+
+        public GotoStatement(string name)
+        {
+            this.name = name;
+        }
     }
 
     // do
     public class DoStatement : Statement
     {
-        public Block block { get; set; } = null;
+        public Block block { get; private set; } = null;
+
+        public DoStatement(Block block)
+        {
+            this.block = block;
+        }
     }
 
     // 函数调用
@@ -49,15 +69,27 @@ namespace LuaVM.Net.Core
     // while
     public class WhileStatement : Statement
     {
-        public Expression expression { get; set; } = null;
-        public Block block { get; set; } = null;
+        public Expression expression { get; private set; } = null;
+        public Block block { get; private set; } = null;
+
+        public WhileStatement(Expression expression, Block block)
+        {
+            this.expression = expression;
+            this.block = block;
+        }
     }
 
     // repeat
     public class RepeatStatement : Statement
     {
-        public Expression expression { get; set; } = null;
-        public Block block { get; set; } = null;
+        public Expression expression { get; private set; } = null;
+        public Block block { get; private set; } = null;
+
+        public RepeatStatement(Expression expression, Block block)
+        {
+            this.expression = expression;
+            this.block = block;
+        }
     }
 
     // if

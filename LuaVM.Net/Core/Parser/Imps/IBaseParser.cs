@@ -7,6 +7,6 @@ namespace LuaVM.Net.Core
 {
     interface IBaseParser
     {
-        Statement Parse(Lexer lexer);
+        Statement Parse(Lexer lexer, Parser parser);
     }
 }

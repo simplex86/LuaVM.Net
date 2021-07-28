@@ -20,9 +20,24 @@ namespace LuaVM.Net.Core
         }
 
         // 解析语句
-        private void ParseStatements(Lexer lexer, Block block)
+        private List<Statement> ParseStatements(Lexer lexer, Block block)
         {
+            List<Statement> stats = new List<Statement>(4);
 
+            var type = lexer.LookAhead();
+            while (!IsReturnOrBlockEnds(type))
+            {
+                var parser = ParserFactory.Instance.Get(type);
+                var stat = parser.Parse(lexer, this);
+                if (stat.GetType() != typeof(EmptyStatement))
+                {
+                    stats.Add(stat);
+                }
+
+                type = lexer.LookAhead();
+            }
+
+            return stats;
         }
 
         // 解析表达式

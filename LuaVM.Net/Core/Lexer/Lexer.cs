@@ -15,6 +15,9 @@ namespace LuaVM.Net.Core
         // 行号
         public int line { get; private set; } = 0;
 
+        // 下一个token，用于预览
+        private Token nextToken = null;
+
         // 构造函数
         public Lexer(string name, string chunk, int line)
         {
@@ -26,6 +29,15 @@ namespace LuaVM.Net.Core
         // Token
         public Token NextToken()
         {
+            if (nextToken != null)
+            {
+                var token = nextToken;
+                nextToken = null;
+                line = token.line;
+
+                return token;
+            }
+
             SkipWhiteSpace();
 
             if (chunk.Length > 0)
@@ -192,6 +204,21 @@ namespace LuaVM.Net.Core
             return new Token(TokenType.EOF, "eof", line);
         }
 
+        // 提前预览下一个token的类型
+        public int LookAhead()
+        {
+            if (nextToken != null)
+            {
+                return nextToken.type;
+            }
+
+            var curline = line;
+            nextToken = NextToken();
+            line = curline;
+
+            return nextToken.type;
+        }
+
         // 下一个指定类型的token
         public Token NextTokenOfType(int type)
         {
@@ -202,6 +229,12 @@ namespace LuaVM.Net.Core
             }
 
             return token;
+        }
+
+        // 获取下一个标识符
+        public Token NextIdentifier()
+        {
+            return NextTokenOfType(TokenType.IDENTIFIER);
         }
 
         // 跳过空格、制表符、注释、换行等空白字符
