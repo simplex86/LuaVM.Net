@@ -8,12 +8,19 @@ namespace LuaVM.Net.Core
     // 基类
     public class Statement
     {
+        protected Statement()
+        {
 
+        }
     }
 
     // 空语句
     public class EmptyStatement : Statement
     {
+        public EmptyStatement()
+        {
+
+        }
     }
 
     // break
@@ -63,7 +70,12 @@ namespace LuaVM.Net.Core
     // 函数调用
     public class FunctionCallStatement : Statement
     {
-        
+        public FunctionCallExpression expression { get; private set; } = null;
+
+        public FunctionCallStatement(Expression expression)
+        {
+            this.expression = expression as FunctionCallExpression;
+        }
     }
 
     // while
@@ -95,37 +107,75 @@ namespace LuaVM.Net.Core
     // if
     public class IfStatement : Statement
     {
-        public List<Expression> expressions { get; } = new List<Expression>();
-        public List<Block> blocks { get; } = new List<Block>();
+        public List<Expression> expressions { get; private set; } = new List<Expression>();
+        public List<Block> blocks { get; private set; } = new List<Block>();
+
+        public IfStatement(List<Expression> expressions, List<Block> blocks)
+        {
+            this.expressions = expressions;
+            this.blocks = blocks;
+        }
     }
 
     // for i=n, m do
     public class ForNumStatement : Statement
     {
-        public int lineOfFor { get; set; } = 0;
-        public int lineOfDo { get; set; } = 0;
-        public string varname { get; set; } = string.Empty;
-        public Expression initExpression { get; set; } = null;
-        public Expression limitExpression { get; set; } = null;
-        public Expression stepExpression { get; set; } = null;
-        public Block block { get; set; } = null;
+        public int lineOfFor { get; private set; } = 0;
+        public int lineOfDo { get; private set; } = 0;
+        public string varname { get; private set; } = string.Empty;
+        public Expression initExpression { get; private set; } = null;
+        public Expression limitExpression { get; private set; } = null;
+        public Expression stepExpression { get; private set; } = null;
+        public Block block { get; private set; } = null;
+
+        public ForNumStatement(int lineOfFor, 
+                               int lineOfDo, 
+                               string varname, 
+                               Expression initExp, 
+                               Expression limitExp, 
+                               Expression stepExp, 
+                               Block block)
+        {
+            this.lineOfFor = lineOfFor;
+            this.lineOfDo = lineOfDo;
+            this.varname = varname;
+            this.initExpression = initExp;
+            this.limitExpression = limitExp;
+            this.stepExpression = stepExp;
+            this.block = block;
+        }
     }
 
     // for k, v in pairs(table) do
     public class ForInStatement : Statement
     {
-        public int lineOfDo { get; set; } = 0;
-        public List<string> names { get; } = new List<string>();
-        public List<Expression> expressions { get; } = new List<Expression>();
-        public Block block { get; set; } = null;
+        public int lineOfDo { get; private set; } = 0;
+        public List<string> names { get; private set; } = new List<string>();
+        public List<Expression> expressions { get; private set; } = new List<Expression>();
+        public Block block { get; private set; } = null;
+
+        public ForInStatement(int lineOfDo, List<string> names, List<Expression> expressions, Block block)
+        {
+            this.lineOfDo = lineOfDo;
+            this.names = names;
+            this.expressions = expressions;
+            this.block = block;
+        }
     }
 
     // local var
-    public class LocalVarStatement : Statement
+    public class LocalVariateStatement : Statement
     {
         public int lastline { get; set; } = 0;
         public List<string> names { get; } = new List<string>();
         public List<Expression> expressions { get; } = new List<Expression>();
+
+        public LocalVariateStatement(int lastline, List<string> names, List<Expression> expressions)
+        {
+            this.lastline = lastline;
+            this.names = names;
+            this.expressions = expressions;
+        }
     }
 
     // assign
@@ -137,9 +187,15 @@ namespace LuaVM.Net.Core
     }
 
     // local function
-    public class LocalFunctionStatement : Statement
+    public class LocalFunctionDefineStatement : Statement
     {
-        public string name { get; set; } = string.Empty;
-        public Expression expression { get; set; } = null;
+        public string name { get; private set; } = string.Empty;
+        public Expression expression { get; private set; } = null;
+
+        public LocalFunctionDefineStatement(string name, Expression exp)
+        {
+            this.name = name;
+            this.expression = exp;
+        }
     }
 }

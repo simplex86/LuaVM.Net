@@ -40,6 +40,12 @@ namespace LuaVM.Net.Core
     {
         public int line { get; set; } = 0;
         public long value { get; set; } = 0;
+
+        public IntegerExpression(int line, int value)
+        {
+            this.line = line;
+            this.value = value;
+        }
     }
 
     // float

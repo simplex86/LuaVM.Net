@@ -8,7 +8,7 @@ namespace LuaVM.Net.Core
     public class Parser
     {
         // 解析Block/Chunk
-        public Block Parse(Lexer lexer)
+        public Block ParseBlock(Lexer lexer)
         {
             Block block = new Block();
 
@@ -17,6 +17,42 @@ namespace LuaVM.Net.Core
             block.lastline = lexer.line;
 
             return block;
+        }
+
+        // 
+        public List<Expression> ParseExpressions(Lexer lexer)
+        {
+            List<Expression> expressions = new List<Expression>();
+
+            var exp = ParseExpression(lexer);
+            expressions.Add(exp);
+
+            while(lexer.LookAhead() == TokenType.SEP_COMMA)
+            {
+                lexer.NextToken();
+                exp = ParseExpression(lexer);
+                expressions.Add(exp);
+            }
+
+            return expressions;
+        }
+
+        // 解析函数定义表达式
+        public Expression ParseFunctionDefineExpression(Lexer lexer)
+        {
+            return null;
+        }
+
+        // 解析前缀表达式
+        public Expression ParsePrefixExpression(Lexer lexer)
+        {
+            return null;
+        }
+
+        // 解析表达式
+        public Expression ParseExpression(Lexer lexer)
+        {
+            return null;
         }
 
         // 解析语句
