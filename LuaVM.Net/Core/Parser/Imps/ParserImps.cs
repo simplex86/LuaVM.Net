@@ -243,7 +243,7 @@ namespace LuaVM.Net.Core
     {
         public override Statement Parse(Lexer lexer, Parser parser)
         {
-            var prefix = parser.ParsePrefixExpression(lexer);
+            var prefix = ParsePrefixExpression(lexer, parser);
             if (prefix.GetType() == typeof(FunctionCallExpression))
             {
                 var exp = prefix as FunctionCallExpression;
@@ -251,6 +251,115 @@ namespace LuaVM.Net.Core
             }
 
             return ParseAssignStatement(lexer);
+        }
+
+        // 解析前缀表达式
+        private Expression ParsePrefixExpression(Lexer lexer, Parser parser)
+        {
+            Expression exp = null;
+            if (lexer.LookAhead() == TokenType.IDENTIFIER)
+            {
+                var token = lexer.NextIdentifier();
+                exp = new NameExpression(token.line, token.text);
+            }
+            else
+            {
+                exp = ParseParensExpression(lexer, parser);
+            }
+            return FinishPrefixExpression(lexer, parser, exp);
+        }
+
+        private Expression FinishPrefixExpression(Lexer lexer, Parser parser, Expression exp)
+        {
+            while (true)
+            {
+                switch (lexer.LookAhead())
+                {
+                    case TokenType.SEP_LABEL:
+                        lexer.NextToken();
+                        var key1 = parser.ParseExpression(lexer);
+                        lexer.NextIdentifier();
+                        exp = new TableAccessExpression(lexer.line, exp, key1);
+                        break;
+                    case TokenType.SEP_DOT:
+                        lexer.NextToken();
+                        var token = lexer.NextIdentifier();
+                        var key2 = new StringExpression(token.line, token.text);
+                        exp = new TableAccessExpression(lexer.line, exp, key2);
+                        break;
+                    case TokenType.SEP_COLON:
+                    case TokenType.SEP_LPAREN:
+                    case TokenType.SEP_LCURLY:
+                    case TokenType.STRING:
+                        exp = FinishFunctionCallExpression(lexer, parser, exp);
+                        break;
+                    default:
+                        return exp;
+                }
+            }
+        }
+
+        private Expression ParseParensExpression(Lexer lexer, Parser parser)
+        {
+            lexer.NextTokenOfType(TokenType.SEP_LPAREN);
+            var exp = parser.ParseExpression(lexer);
+            lexer.NextTokenOfType(TokenType.SEP_RPAREN);
+
+            var type = exp.GetType();
+            if (type == typeof(VarargExpression)        ||
+                type == typeof(FunctionCallExpression)  ||
+                type == typeof(NameExpression)          ||
+                type == typeof(TableAccessExpression))
+            {
+                return new ParensExpression(exp);
+            }
+
+            return exp;
+        }
+
+        private Expression FinishFunctionCallExpression(Lexer lexer, Parser parser, Expression prefix)
+        {
+            var name = ParseNameExpression(lexer, parser);
+            var line1 = lexer.line;
+            var args = ParsrAegsExpression(lexer, parser);
+            var line2 = lexer.line;
+
+            return new FunctionCallExpression(line1, line2, prefix, name, args);
+        }
+
+        private StringExpression ParseNameExpression(Lexer lexer, Parser parser)
+        {
+            if (lexer.LookAhead() == TokenType.SEP_COLON)
+            {
+                lexer.NextToken();
+                var token = lexer.NextIdentifier();
+                return new StringExpression(token.line, token.text);
+            }
+
+            return null;
+        }
+
+        private List<Expression> ParsrAegsExpression(Lexer lexer, Parser parser)
+        {
+            List<Expression> args = null;
+
+            switch (lexer.LookAhead())
+            {
+                case TokenType.SEP_LPAREN:
+                    lexer.NextToken();
+                    if (lexer.LookAhead() == TokenType.SEP_RPAREN)
+                    {
+                        args = parser.ParseExpressions(lexer);
+                    }
+                    lexer.NextTokenOfType(TokenType.SEP_RPAREN);
+                    break;
+                case TokenType.SEP_LCURLY:
+                    break;
+                default:
+                    break;
+            }
+
+            return args;
         }
 
         // 

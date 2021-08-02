@@ -43,12 +43,6 @@ namespace LuaVM.Net.Core
             return null;
         }
 
-        // 解析前缀表达式
-        public Expression ParsePrefixExpression(Lexer lexer)
-        {
-            return null;
-        }
-
         // 解析表达式
         public Expression ParseExpression(Lexer lexer)
         {
