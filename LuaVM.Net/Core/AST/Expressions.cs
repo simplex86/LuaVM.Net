@@ -15,24 +15,44 @@ namespace LuaVM.Net.Core
     public class NilExpression : Expression
     {
         public int line { get; private set; } = 0;
+
+        public NilExpression(int line)
+        {
+            this.line = line;
+        }
     }
 
     // true
     public class TrueExpression : Expression
     {
         public int line { get; private set; } = 0;
+
+        public TrueExpression(int line)
+        {
+            this.line = line;
+        }
     }
 
     // false
     public class FalseExpression : Expression
     {
         public int line { get; private set; } = 0;
+
+        public FalseExpression(int line)
+        {
+            this.line = line;
+        }
     }
 
     // vararg
     public class VarargExpression : Expression
     {
         public int line { get; private set; } = 0;
+
+        public VarargExpression(int line)
+        {
+            this.line = line;
+        }
     }
 
     // int
@@ -41,7 +61,7 @@ namespace LuaVM.Net.Core
         public int line { get; private set; } = 0;
         public long value { get; private set; } = 0;
 
-        public IntegerExpression(int line, int value)
+        public IntegerExpression(int line, long value)
         {
             this.line = line;
             this.value = value;
@@ -49,10 +69,16 @@ namespace LuaVM.Net.Core
     }
 
     // float
-    public class FlaotExpression : Expression
+    public class FloatExpression : Expression
     {
         public int line { get; private set; } = 0;
         public double value { get; private set; } = 0.0;
+
+        public FloatExpression(int line, double value)
+        {
+            this.line = line;
+            this.value = value;
+        }
     }
 
     // string
@@ -82,11 +108,18 @@ namespace LuaVM.Net.Core
     }
 
     // 一元运算符
-    public class UniOpExpression : Expression
+    public class UnaryOpExpression : Expression
     {
         public int line { get; private set; } = 0;
         public int op { get; private set; } = 0;
         public Expression expression { get; private set; } = null;
+
+        public UnaryOpExpression(int line, int op, Expression expression)
+        {
+            this.line = line;
+            this.op = op;
+            this.expression = expression;
+        }
     }
 
     // 二元运算符
@@ -96,13 +129,27 @@ namespace LuaVM.Net.Core
         public int op { get; private set; } = 0;
         public Expression a { get; private set; } = null;
         public Expression b { get; private set; } = null;
+
+        public BinOpExpression(int line, int op, Expression a, Expression b)
+        {
+            this.line = line;
+            this.op = op;
+            this.a = a;
+            this.b = b;
+        }
     }
 
     // 拼接运算符
     public class ConcatExpression : Expression
     {
         public int line { get; private set; } = 0;
-        public List<Expression> expressions { get; private set; } = new List<Expression>();
+        public List<Expression> expressions { get; private set; } = null;
+
+        public ConcatExpression(int line, List<Expression> expressions)
+        {
+            this.line = line;
+            expressions = expressions;
+        }
     }
 
     // 构造表
@@ -110,8 +157,16 @@ namespace LuaVM.Net.Core
     {
         public int line { get; private set; } = 0;
         public int lastline { get; private set; } = 0;
-        public Expression key { get; private set; } = null;
-        public Expression value { get; private set; } = null;
+        public List<Expression> keys { get; private set; } = null;
+        public List<Expression> values { get; private set; } = null;
+
+        public TableConstructionExpression(int line, int lastline, List<Expression> keys, List<Expression> values)
+        {
+            this.line = line;
+            this.lastline = lastline;
+            this.keys = keys;
+            this.values = values;
+        }
     }
 
     // 函数定义
@@ -119,9 +174,18 @@ namespace LuaVM.Net.Core
     {
         public int line { get; private set; } = 0;
         public int lastline { get; private set; } = 0;
-        public List<Expression> args { get; private set; } = new List<Expression>();
+        public List<string> args { get; private set; } = null;
         public bool isVararg { get; private set; } = false;
         public Block block { get; private set; } = null;
+
+        public FunctionDefineExpression(int line, int lastline, List<string> args, bool isVararg, Block block)
+        {
+            this.line = line;
+            this.lastline = lastline;
+            this.args = args;
+            this.isVararg = isVararg;
+            this.block = block;
+        }
     }
 
     // 圆括号

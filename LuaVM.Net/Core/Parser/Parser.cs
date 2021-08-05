@@ -1,90 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace LuaVM.Net.Core
 {
+    // 语法解释器
+    // https://www.lua.org/manual/5.3/manual.html#9
     public class Parser
     {
-        // 解析Block/Chunk
-        public Block ParseBlock(Lexer lexer)
+        // 语法分析
+        public Block Parse(Lexer lexer)
         {
-            Block block = new Block();
-
-            ParseStatements(lexer, block);
-            ParseReturnExpressions(lexer, block);
-            block.lastline = lexer.line;
+            BlockParser parser = new BlockParser();
+            var block = parser.Parse(lexer);
+            lexer.NextTokenOfType(TokenType.EOF);
 
             return block;
-        }
-
-        // 
-        public List<Expression> ParseExpressions(Lexer lexer)
-        {
-            List<Expression> expressions = new List<Expression>();
-
-            var exp = ParseExpression(lexer);
-            expressions.Add(exp);
-
-            while(lexer.LookAhead() == TokenType.SEP_COMMA)
-            {
-                lexer.NextToken();
-                exp = ParseExpression(lexer);
-                expressions.Add(exp);
-            }
-
-            return expressions;
-        }
-
-        // 解析函数定义表达式
-        public Expression ParseFunctionDefineExpression(Lexer lexer)
-        {
-            return null;
-        }
-
-        // 解析表达式
-        public Expression ParseExpression(Lexer lexer)
-        {
-            return null;
-        }
-
-        // 解析语句
-        private List<Statement> ParseStatements(Lexer lexer, Block block)
-        {
-            List<Statement> stats = new List<Statement>(4);
-
-            var type = lexer.LookAhead();
-            while (!IsReturnOrBlockEnds(type))
-            {
-                var parser = ParserFactory.Instance.Get(type);
-                var stat = parser.Parse(lexer, this);
-                if (stat.GetType() != typeof(EmptyStatement))
-                {
-                    stats.Add(stat);
-                }
-
-                type = lexer.LookAhead();
-            }
-
-            return stats;
-        }
-
-        // 解析表达式
-        private void ParseReturnExpressions(Lexer lexer, Block block)
-        {
-
-        }
-
-        // 是否是return或者block结尾
-        private bool IsReturnOrBlockEnds(int tokenType)
-        {
-            return (tokenType == TokenType.KW_RETURN ||
-                    tokenType == TokenType.EOF       ||
-                    tokenType == TokenType.KW_END    ||
-                    tokenType == TokenType.KW_ELSE   ||
-                    tokenType == TokenType.KW_ELSEIF ||
-                    tokenType == TokenType.KW_UNTIL);
         }
     }
 }

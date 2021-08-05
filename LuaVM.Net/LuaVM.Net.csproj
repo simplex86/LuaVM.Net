@@ -47,11 +47,34 @@
     <Compile Include="Core\AST\Expressions.cs" />
     <Compile Include="Core\AST\Statements.cs" />
     <Compile Include="Core\Const.cs" />
+    <Compile Include="Core\Error.cs" />
     <Compile Include="Core\Lexer\Lexer.cs" />
     <Compile Include="Core\Lexer\Token.cs" />
-    <Compile Include="Core\Parser\Imps\IBaseParser.cs" />
-    <Compile Include="Core\Parser\Imps\ParserFactory.cs" />
-    <Compile Include="Core\Parser\Imps\ParserImps.cs" />
+    <Compile Include="Core\Parser\Internals\ExpressionParsers\CommonExpressionParser.cs" />
+    <Compile Include="Core\Parser\Internals\ExpressionParsers\FunctionCallExpressionParser.cs" />
+    <Compile Include="Core\Parser\Internals\ExpressionParsers\FunctionDefineExpressionParser.cs" />
+    <Compile Include="Core\Parser\Internals\ExpressionParsers\IBaseExpressionParser.cs" />
+    <Compile Include="Core\Parser\Internals\ExpressionParsers\NumberExpressionParser.cs" />
+    <Compile Include="Core\Parser\Internals\ExpressionParsers\OperatorExpressionParser.cs" />
+    <Compile Include="Core\Parser\Internals\ExpressionParsers\ParensExpressionParser.cs" />
+    <Compile Include="Core\Parser\Internals\ExpressionParsers\PrefixExpressionParser.cs" />
+    <Compile Include="Core\Parser\Internals\ExpressionParsers\TableConstructorExpressionParser.cs" />
+    <Compile Include="Core\Parser\Internals\Utils\ExpressionUtils.cs" />
+    <Compile Include="Core\Parser\Internals\Utils\VariateUtils.cs" />
+    <Compile Include="Core\Parser\Internals\BlockParser.cs" />
+    <Compile Include="Core\Parser\Internals\StatementParsers\AssignOrFunctionCallStatementParser.cs" />
+    <Compile Include="Core\Parser\Internals\StatementParsers\BreakStatementParser.cs" />
+    <Compile Include="Core\Parser\Internals\StatementParsers\DoStatementParser.cs" />
+    <Compile Include="Core\Parser\Internals\StatementParsers\EmptyStatementParser.cs" />
+    <Compile Include="Core\Parser\Internals\StatementParsers\ForStatementParser.cs" />
+    <Compile Include="Core\Parser\Internals\StatementParsers\FunctionDefineStatementParser.cs" />
+    <Compile Include="Core\Parser\Internals\StatementParsers\GotoStatementParser.cs" />
+    <Compile Include="Core\Parser\Internals\StatementParsers\IBaseStatementParser.cs" />
+    <Compile Include="Core\Parser\Internals\StatementParsers\IfStatementParser.cs" />
+    <Compile Include="Core\Parser\Internals\StatementParsers\LabelStatementParser.cs" />
+    <Compile Include="Core\Parser\Internals\StatementParsers\LocalAssignOrFunctionDefineStatementParser.cs" />
+    <Compile Include="Core\Parser\Internals\StatementParsers\RepeatStatementParser.cs" />
+    <Compile Include="Core\Parser\Internals\StatementParsers\WhileStatementParser.cs" />
     <Compile Include="Core\Parser\Parser.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -59,5 +82,6 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

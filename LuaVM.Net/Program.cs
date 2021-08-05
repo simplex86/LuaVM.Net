@@ -9,7 +9,7 @@ namespace LuaVM.Net
         static void Main(string[] args)
         {
             var rootpath = GetProjectPath();
-            LoadFile(Path.Combine(rootpath, @"Luas\01.lua"));
+            LoadFile(Path.Combine(rootpath, @"Luas\03.lua"));
             // pause
             Console.ReadKey();
         }
@@ -24,7 +24,20 @@ namespace LuaVM.Net
                 return;
             }
 
-            var lexer = new Lexer(fullname, lua, 1);
+            TestParser(fullname, lua);
+            Console.WriteLine("done!");
+        }
+
+        // 获取工程路径
+        static string GetProjectPath()
+        {
+            return Directory.GetParent(Environment.CurrentDirectory).Parent.Parent.FullName;
+        }
+
+        static void TestLexer(string filename, string lua)
+        {
+            var lexer = new Lexer(filename, lua, 1);
+            Console.WriteLine("lexer:");
             while (true)
             {
                 var token = lexer.NextToken();
@@ -33,12 +46,17 @@ namespace LuaVM.Net
                 if (token.type == TokenType.EOF)
                     break;
             }
+            Console.WriteLine("lexer done!");
         }
 
-        // 获取工程路径
-        static string GetProjectPath()
+        static void TestParser(string filename, string lua)
         {
-            return Directory.GetParent(Environment.CurrentDirectory).Parent.Parent.FullName;
+            var lexer = new Lexer(filename, lua, 1);
+            var parser = new Parser();
+
+            Console.WriteLine("parser:");
+            var block = parser.Parse(lexer);
+            Console.WriteLine("parser done!");
         }
     }
 }

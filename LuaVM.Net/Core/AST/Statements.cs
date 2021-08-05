@@ -181,9 +181,16 @@ namespace LuaVM.Net.Core
     // assign
     public class AssignStatement : Statement
     {
-        public int lastline { get; set; } = 0;
-        public List<Expression> vars { get; } = new List<Expression>();
-        public List<Expression> expressions { get; } = new List<Expression>();
+        public int lastline { get; private set; } = 0;
+        public List<Expression> vars { get; private set; } = null;
+        public List<Expression> expressions { get; private set; } = null;
+
+        public AssignStatement(int lastline, List<Expression> vars, List<Expression> expressions)
+        {
+            this.lastline = lastline;
+            this.vars = vars;
+            this.expressions = expressions;
+        }
     }
 
     // local function

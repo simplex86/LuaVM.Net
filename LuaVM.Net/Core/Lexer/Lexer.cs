@@ -198,7 +198,7 @@ namespace LuaVM.Net.Core
                     return new Token(TokenType.IDENTIFIER, token, line);
                 }
 
-                Error($"unexpected symbol near {c}");
+                Error.Commit($"lexer error: unexpected symbol near {c}");
             }
 
             return new Token(TokenType.EOF, "eof", line);
@@ -225,7 +225,7 @@ namespace LuaVM.Net.Core
             var token = NextToken();
             if (token.type != type)
             {
-                Error($"syntax error near \'{token.text}\'");
+                Error.Commit($"lexer error: syntax error near \'{token.text}\'");
             }
 
             return token;
@@ -317,7 +317,7 @@ namespace LuaVM.Net.Core
             var match = Regex.Match(chunk, "^\\[=*\\[");
             if (!match.Success)
             {
-                Error("");
+                Error.Commit("lexer error: ");
                 return string.Empty;
             }
 
@@ -327,7 +327,7 @@ namespace LuaVM.Net.Core
 
             if (closingLongBracketIndex < 0)
             {
-                Error("");
+                Error.Commit("lexer error: ");
                 return string.Empty;
             }
 
@@ -351,7 +351,7 @@ namespace LuaVM.Net.Core
             var match = Regex.Match(chunk, "([\'\"])(?:\\\\(?:\r\n |[\\s\\S])|[^\\\\\r\n])*?\\1");
             if (!match.Success)
             {
-                Error("");
+                Error.Commit("lexer error: ");
                 return string.Empty;
             }
 
@@ -409,7 +409,7 @@ namespace LuaVM.Net.Core
             var match = Regex.Match(chunk, pattern);
             if (!match.Success)
             {
-                Error("");
+                Error.Commit("lexer error: ");
                 return string.Empty;
             }
 
@@ -417,13 +417,6 @@ namespace LuaVM.Net.Core
             Skip(token.Length);
 
             return token;
-        }
-
-        // 输出错误信息
-        private void Error(string info)
-        {
-            var text = info;
-            Console.WriteLine($"error: {text}");
         }
     }
 }
