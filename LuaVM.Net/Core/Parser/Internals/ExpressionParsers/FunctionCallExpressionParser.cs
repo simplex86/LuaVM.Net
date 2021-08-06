@@ -6,6 +6,7 @@ namespace LuaVM.Net.Core
     class FunctionCallExpressionParser : IBaseExpressionParser
     {
         public Expression prefix { get; set; } = null;
+        private TableConstructorExpressionParser tableParser = new TableConstructorExpressionParser();
 
         public Expression Parse(Lexer lexer)
         {
@@ -32,20 +33,30 @@ namespace LuaVM.Net.Core
         private List<Expression> ParseFunctionCallArgsExpressions(Lexer lexer)
         {
             List<Expression> args = null;
+            Expression exp = null;
 
             switch (lexer.LookAhead())
             {
                 case TokenType.SEP_LPAREN:
                     lexer.NextToken();
-                    if (lexer.LookAhead() == TokenType.SEP_RPAREN)
+                    if (lexer.LookAhead() != TokenType.SEP_RPAREN)
                     {
                         args = ExpressionUtils.ParseExpressions(lexer);
                     }
                     lexer.NextTokenOfType(TokenType.SEP_RPAREN);
                     break;
                 case TokenType.SEP_LCURLY:
+                    // 解析table形式的参数
+                    args = new List<Expression>();
+                    exp = tableParser.Parse(lexer);
+                    args.Add(exp);
                     break;
-                default:
+                default: 
+                    // 解析字符串字面量
+                    args = new List<Expression>();
+                    var token = lexer.NextTokenOfType(TokenType.STRING);
+                    exp = new StringExpression(token.line, token.text);
+                    args.Add(exp);
                     break;
             }
 
