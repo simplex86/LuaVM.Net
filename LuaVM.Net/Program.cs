@@ -25,7 +25,6 @@ namespace LuaVM.Net
             }
 
             TestParser(fullname, lua);
-            Console.WriteLine("done!");
         }
 
         // 获取工程路径
@@ -56,6 +55,10 @@ namespace LuaVM.Net
 
             Console.WriteLine("parser:");
             var block = parser.Parse(lexer);
+            LitJson.JsonWriter jw = new LitJson.JsonWriter();
+            jw.PrettyPrint = true;
+            LitJson.JsonMapper.ToJson(block, jw);
+            Console.WriteLine(jw.TextWriter.ToString());
             Console.WriteLine("parser done!");
         }
     }
