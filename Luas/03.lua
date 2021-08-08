@@ -2,4 +2,4 @@
 	03.lua
 ]]
 
-print("hellow world")
+print("hello world")

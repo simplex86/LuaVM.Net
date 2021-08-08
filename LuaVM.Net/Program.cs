@@ -9,7 +9,7 @@ namespace LuaVM.Net
         static void Main(string[] args)
         {
             var rootpath = GetProjectPath();
-            LoadFile(Path.Combine(rootpath, @"Luas\03.lua"));
+            LoadFile(Path.Combine(rootpath, @"Luas\05.lua"));
             // pause
             Console.ReadKey();
         }
