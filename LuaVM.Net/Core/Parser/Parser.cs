@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace LuaVM.Net.Core
 {
-    // 语法解释器
+    // 语法分析器
     // https://www.lua.org/manual/5.3/manual.html#9
     public class Parser
     {

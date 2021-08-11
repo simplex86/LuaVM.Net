@@ -6,6 +6,7 @@ using System.Linq;
 
 namespace LuaVM.Net.Core
 {
+    // 词法分析器
     public class Lexer
     {
         // 源码

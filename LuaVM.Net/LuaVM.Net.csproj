@@ -76,6 +76,11 @@
     <Compile Include="Core\Parser\Internals\StatementParsers\RepeatStatementParser.cs" />
     <Compile Include="Core\Parser\Internals\StatementParsers\WhileStatementParser.cs" />
     <Compile Include="Core\Parser\Parser.cs" />
+    <Compile Include="Core\VM\Chunk\Chunk.cs" />
+    <Compile Include="Core\VM\Chunk\ChunkReader.cs" />
+    <Compile Include="Core\VM\Instruction.cs" />
+    <Compile Include="Core\VM\OperationCode.cs" />
+    <Compile Include="Core\VM\Utils\ConvertUtils.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tools\LitJson\IJsonWrapper.cs" />

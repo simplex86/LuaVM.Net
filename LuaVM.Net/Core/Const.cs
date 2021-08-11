@@ -5,80 +5,80 @@ using System.Text;
 namespace LuaVM.Net.Core
 {
     // Token类型
-    public static class TokenType
+    internal static class TokenType
     {
-        public const int EOF            = 1;    // EOF  end-of-file
-        public const int VARARG         = 2;    // ...
+        internal const int EOF            = 1;    // EOF  end-of-file
+        internal const int VARARG         = 2;    // ...
 
-        public const int SEP_SEMI       = 3;    // ;
-        public const int SEP_COMMA      = 4;    // ,
-        public const int SEP_DOT        = 5;    // .
-        public const int SEP_COLON      = 6;    // :
-        public const int SEP_LABEL      = 7;    // ::
-        public const int SEP_LPAREN     = 8;    // (
-        public const int SEP_RPAREN     = 9;    // )
-        public const int SEP_LBRACK     = 10;    // [
-        public const int SEP_RBRACK     = 11;   // ]
-        public const int SEP_LCURLY     = 12;   // {
-        public const int SEP_RCURLY     = 13;   // }
+        internal const int SEP_SEMI       = 3;    // ;
+        internal const int SEP_COMMA      = 4;    // ,
+        internal const int SEP_DOT        = 5;    // .
+        internal const int SEP_COLON      = 6;    // :
+        internal const int SEP_LABEL      = 7;    // ::
+        internal const int SEP_LPAREN     = 8;    // (
+        internal const int SEP_RPAREN     = 9;    // )
+        internal const int SEP_LBRACK     = 10;    // [
+        internal const int SEP_RBRACK     = 11;   // ]
+        internal const int SEP_LCURLY     = 12;   // {
+        internal const int SEP_RCURLY     = 13;   // }
 
-        public const int OP_ASSIGN      = 14;   // =
-        public const int OP_MINUS       = 15;   // -（负号或者减号）
-        public const int OP_WAVE        = 16;   // ~
-        public const int OP_ADD         = 17;   // +
-        public const int OP_MUL         = 18;   // *
-        public const int OP_DIV         = 19;   // /
-        public const int OP_IDIV        = 20;   // //
-        public const int OP_POW         = 21;   // ^
-        public const int OP_MOD         = 22;   // %
-        public const int OP_BIT_AND     = 23;   // &
-        public const int OP_BIT_OR      = 24;   // |
-        public const int OP_BIT_SHR     = 25;   // >>
-        public const int OP_BIT_SHL     = 26;   // <<
-        public const int OP_CONCAT      = 27;   // ..
-        public const int OP_LT          = 28;   // <
-        public const int OP_LE          = 29;   // <=
-        public const int OP_GT          = 30;   // >
-        public const int OP_GE          = 31;   // >=
-        public const int OP_EQ          = 32;   // ==
-        public const int OP_NE          = 33;   // ~=
-        public const int OP_LEN         = 34;   // #
-        public const int OP_AND         = 35;   // and
-        public const int OP_OR          = 36;   // or
-        public const int OP_NOT         = 37;   // not
+        internal const int OP_ASSIGN      = 14;   // =
+        internal const int OP_MINUS       = 15;   // -（负号或者减号）
+        internal const int OP_WAVE        = 16;   // ~
+        internal const int OP_ADD         = 17;   // +
+        internal const int OP_MUL         = 18;   // *
+        internal const int OP_DIV         = 19;   // /
+        internal const int OP_IDIV        = 20;   // //
+        internal const int OP_POW         = 21;   // ^
+        internal const int OP_MOD         = 22;   // %
+        internal const int OP_BIT_AND     = 23;   // &
+        internal const int OP_BIT_OR      = 24;   // |
+        internal const int OP_BIT_SHR     = 25;   // >>
+        internal const int OP_BIT_SHL     = 26;   // <<
+        internal const int OP_CONCAT      = 27;   // ..
+        internal const int OP_LT          = 28;   // <
+        internal const int OP_LE          = 29;   // <=
+        internal const int OP_GT          = 30;   // >
+        internal const int OP_GE          = 31;   // >=
+        internal const int OP_EQ          = 32;   // ==
+        internal const int OP_NE          = 33;   // ~=
+        internal const int OP_LEN         = 34;   // #
+        internal const int OP_AND         = 35;   // and
+        internal const int OP_OR          = 36;   // or
+        internal const int OP_NOT         = 37;   // not
 
-        public const int KW_BREAK       = 38;   // break
-        public const int KW_DO          = 39;   // do
-        public const int KW_ELSE        = 40;   // else
-        public const int KW_ELSEIF      = 41;   // elseif
-        public const int KW_END         = 42;   // end
-        public const int KW_FALSE       = 43;   // false
-        public const int KW_FOR         = 44;   // for
-        public const int KW_FUNCTION    = 45;   // function
-        public const int KW_GOTO        = 46;   // goto
-        public const int KW_IF          = 47;   // if
-        public const int KW_IN          = 48;   // in
-        public const int KW_LOCAL       = 49;   // local
-        public const int KW_NIL         = 50;   // nil
-        public const int KW_REPEAT      = 51;   // repeat
-        public const int KW_RETURN      = 52;   // return
-        public const int KW_THEN        = 53;   // then
-        public const int KW_TRUE        = 54;   // true
-        public const int KW_UNTIL       = 55;   // until
-        public const int KW_WHILE       = 56;   // while
+        internal const int KW_BREAK       = 38;   // break
+        internal const int KW_DO          = 39;   // do
+        internal const int KW_ELSE        = 40;   // else
+        internal const int KW_ELSEIF      = 41;   // elseif
+        internal const int KW_END         = 42;   // end
+        internal const int KW_FALSE       = 43;   // false
+        internal const int KW_FOR         = 44;   // for
+        internal const int KW_FUNCTION    = 45;   // function
+        internal const int KW_GOTO        = 46;   // goto
+        internal const int KW_IF          = 47;   // if
+        internal const int KW_IN          = 48;   // in
+        internal const int KW_LOCAL       = 49;   // local
+        internal const int KW_NIL         = 50;   // nil
+        internal const int KW_REPEAT      = 51;   // repeat
+        internal const int KW_RETURN      = 52;   // return
+        internal const int KW_THEN        = 53;   // then
+        internal const int KW_TRUE        = 54;   // true
+        internal const int KW_UNTIL       = 55;   // until
+        internal const int KW_WHILE       = 56;   // while
 
-        public const int IDENTIFIER     = 57;   // identifier
-        public const int NUMBER         = 58;   // number literal
-        public const int STRING         = 59;   // string literal
+        internal const int IDENTIFIER     = 57;   // identifier
+        internal const int NUMBER         = 58;   // number literal
+        internal const int STRING         = 59;   // string literal
 
-        public const int OP_UNM         = 15;   // unary minus
-        public const int OP_SUB         = 15;   // 
-        public const int OP_BIT_NOT     = 16;   // 
-        public const int OP_BIT_XOR     = 16;   // 
+        internal const int OP_UNM         = 15;   // unary minus
+        internal const int OP_SUB         = 15;   // 
+        internal const int OP_BIT_NOT     = 16;   // 
+        internal const int OP_BIT_XOR     = 16;   // 
     }
 
     // 关键字
-    public static class Keywords
+    internal static class Keywords
     {
         private static readonly Dictionary<string, int> keywords = new Dictionary<string, int>() {
             { "and",        TokenType.OP_AND        },
@@ -106,13 +106,13 @@ namespace LuaVM.Net.Core
         };
 
         // 是否包含
-        public static bool Has(string word)
+        internal static bool Has(string word)
         {
             return keywords.ContainsKey(word);
         }
 
         // 获取值
-        public static int Get(string word)
+        internal static int Get(string word)
         {
             if (Has(word))
             {
@@ -120,5 +120,155 @@ namespace LuaVM.Net.Core
             }
             return 0;
         }
+    }
+
+    // chunk各字段的（固定）值
+    internal static class ChunkValues
+    {
+        internal const string LUA_SIGNATURE       = "\x1bLua";
+        internal const byte   LUAC_VERSION        = 0x53;
+        internal const byte   LUAC_FORMAT         = 0;
+        internal const string LUAC_DATA           = "\x19\x93\r\n\x1a\n";
+        internal const uint   CINT_SIZE           = 4;
+        internal const uint   CSIZET_SIZE_32      = 4;
+        internal const uint   CSIZET_SIZE_64      = 8;
+        internal const uint   INSTRUCTION_SIZE    = 4;
+        internal const uint   LUA_INTEGER_SIZE    = 8;
+        internal const uint   LUA_NUMBER_SIZE     = 8;
+        internal const ushort LUAC_INT            = 0x5678;
+        internal const double LUAC_NUM            = 370.5;
+
+        internal const byte   TAG_NIL             = 0x00;
+        internal const byte   TAG_BOOLEAN         = 0x01;
+        internal const byte   TAG_NUMBER          = 0x03;
+        internal const byte   TAG_INTEGER         = 0x13;
+        internal const byte   TAG_SHORT_STR       = 0x04;
+        internal const byte   TAG_LONG_STR        = 0x14;
+    }
+
+    // 指令编码模式
+    internal static class InstructionMode
+    {
+        internal const byte IABC    = 0;
+        internal const byte IABx    = 1;
+        internal const byte IAsBx   = 2;
+        internal const byte IAx     = 3;
+    }
+
+    // 操作码
+    internal static class OperationCodes
+    {
+        internal const byte OP_MOVE     = 0;
+        internal const byte OP_LOADK    = 1;
+        internal const byte OP_LOADKX   = 2;
+        internal const byte OP_LOADBOOL = 3;
+        internal const byte OP_LOADNIL  = 4;
+        internal const byte OP_GETUPVAL = 5;
+        internal const byte OP_GETTABUP = 6;
+        internal const byte OP_GETTABLE = 7;
+        internal const byte OP_SETTABUP = 8;
+        internal const byte OP_SETUPVAL = 9;
+        internal const byte OP_SETTABLE = 10;
+        internal const byte OP_NEWTABLE = 11;
+        internal const byte OP_SELF     = 12;
+        internal const byte OP_ADD      = 13;
+        internal const byte OP_SUB      = 14;
+        internal const byte OP_MUL      = 15;
+        internal const byte OP_MOD      = 16;
+        internal const byte OP_POW      = 17;
+        internal const byte OP_DIV      = 18;
+        internal const byte OP_IDIV     = 19;
+        internal const byte OP_BAND     = 20;
+        internal const byte OP_BOR      = 21;
+        internal const byte OP_BXOR     = 22;
+        internal const byte OP_SHL      = 23;
+        internal const byte OP_SHR      = 24;
+        internal const byte OP_UNM      = 25;
+        internal const byte OP_BNOT     = 26;
+        internal const byte OP_NOT      = 27;
+        internal const byte OP_LEN      = 28;
+        internal const byte OP_CONCAT   = 29;
+        internal const byte OP_JMP      = 30;
+        internal const byte OP_EQ       = 31;
+        internal const byte OP_LT       = 32;
+        internal const byte OP_LE       = 33;
+        internal const byte OP_TEST     = 34;
+        internal const byte OP_TESTSET  = 35;
+        internal const byte OP_CALL     = 36;
+        internal const byte OP_TAILCALL = 37;
+        internal const byte OP_RETURN   = 38;
+        internal const byte OP_FORLOOP  = 39;
+        internal const byte OP_FORPREP  = 40;
+        internal const byte OP_TFORCALL = 41;
+        internal const byte OP_TFORLOOP = 42;
+        internal const byte OP_SETLIST  = 43;
+        internal const byte OP_CLOSURE  = 44;
+        internal const byte OP_VARARG   = 45;
+        internal const byte OP_EXTRAARG = 46;
+
+        private static readonly OperationCode[] codes = new OperationCode[] {
+            /*                T  A         B                C                 mode             name    */
+            new OperationCode(0, 1, OperationArgs.R, OperationArgs.N, InstructionMode.IABC,  "MOVE    "),
+            new OperationCode(0, 1, OperationArgs.K, OperationArgs.N, InstructionMode.IABx,  "LOADK   "),
+            new OperationCode(0, 1, OperationArgs.N, OperationArgs.N, InstructionMode.IABx,  "LOADKX  "),
+            new OperationCode(0, 1, OperationArgs.U, OperationArgs.U, InstructionMode.IABC,  "LOADBOOL"),
+            new OperationCode(0, 1, OperationArgs.U, OperationArgs.N, InstructionMode.IABC,  "LOADNIL "),
+            new OperationCode(0, 1, OperationArgs.U, OperationArgs.N, InstructionMode.IABC,  "GETUPVAL"),
+            new OperationCode(0, 1, OperationArgs.U, OperationArgs.K, InstructionMode.IABC,  "GETTABUP"),
+            new OperationCode(0, 1, OperationArgs.R, OperationArgs.K, InstructionMode.IABC,  "GETTABLE"),
+            new OperationCode(0, 0, OperationArgs.K, OperationArgs.K, InstructionMode.IABC,  "SETTABUP"),
+            new OperationCode(0, 0, OperationArgs.U, OperationArgs.N, InstructionMode.IABC,  "SETUPVAL"),
+            new OperationCode(0, 0, OperationArgs.K, OperationArgs.K, InstructionMode.IABC,  "SETTABLE"),
+            new OperationCode(0, 1, OperationArgs.U, OperationArgs.U, InstructionMode.IABC,  "NEWTABLE"),
+            new OperationCode(0, 1, OperationArgs.R, OperationArgs.K, InstructionMode.IABC,  "SELF    "),
+            new OperationCode(0, 1, OperationArgs.K, OperationArgs.K, InstructionMode.IABC,  "ADD     "),
+            new OperationCode(0, 1, OperationArgs.K, OperationArgs.K, InstructionMode.IABC,  "SUB     "),
+            new OperationCode(0, 1, OperationArgs.K, OperationArgs.K, InstructionMode.IABC,  "MUL     "),
+            new OperationCode(0, 1, OperationArgs.K, OperationArgs.K, InstructionMode.IABC,  "MOD     "),
+            new OperationCode(0, 1, OperationArgs.K, OperationArgs.K, InstructionMode.IABC,  "POW     "),
+            new OperationCode(0, 1, OperationArgs.K, OperationArgs.K, InstructionMode.IABC,  "DIV     "),
+            new OperationCode(0, 1, OperationArgs.K, OperationArgs.K, InstructionMode.IABC,  "IDIV    "),
+            new OperationCode(0, 1, OperationArgs.K, OperationArgs.K, InstructionMode.IABC,  "BAND    "),
+            new OperationCode(0, 1, OperationArgs.K, OperationArgs.K, InstructionMode.IABC,  "BOR     "),
+            new OperationCode(0, 1, OperationArgs.K, OperationArgs.K, InstructionMode.IABC,  "BXOR    "),
+            new OperationCode(0, 1, OperationArgs.K, OperationArgs.K, InstructionMode.IABC,  "SHL     "),
+            new OperationCode(0, 1, OperationArgs.K, OperationArgs.K, InstructionMode.IABC,  "SHR     "),
+            new OperationCode(0, 1, OperationArgs.R, OperationArgs.N, InstructionMode.IABC,  "UNM     "),
+            new OperationCode(0, 1, OperationArgs.R, OperationArgs.N, InstructionMode.IABC,  "BNOT    "),
+            new OperationCode(0, 1, OperationArgs.R, OperationArgs.N, InstructionMode.IABC,  "NOT     "),
+            new OperationCode(0, 1, OperationArgs.R, OperationArgs.N, InstructionMode.IABC,  "LEN     "),
+            new OperationCode(0, 1, OperationArgs.R, OperationArgs.R, InstructionMode.IABC,  "CONCAT  "),
+            new OperationCode(0, 0, OperationArgs.R, OperationArgs.N, InstructionMode.IAsBx, "JMP     "),
+            new OperationCode(1, 0, OperationArgs.K, OperationArgs.K, InstructionMode.IABC,  "EQ      "),
+            new OperationCode(1, 0, OperationArgs.K, OperationArgs.K, InstructionMode.IABC,  "LT      "),
+            new OperationCode(1, 0, OperationArgs.K, OperationArgs.K, InstructionMode.IABC,  "LE      "),
+            new OperationCode(1, 0, OperationArgs.N, OperationArgs.U, InstructionMode.IABC,  "TEST    "),
+            new OperationCode(1, 1, OperationArgs.R, OperationArgs.U, InstructionMode.IABC,  "TESTSET "),
+            new OperationCode(0, 1, OperationArgs.U, OperationArgs.U, InstructionMode.IABC,  "CALL    "),
+            new OperationCode(0, 1, OperationArgs.U, OperationArgs.U, InstructionMode.IABC,  "TAILCALL"),
+            new OperationCode(0, 0, OperationArgs.U, OperationArgs.N, InstructionMode.IABC,  "RETURN  "),
+            new OperationCode(0, 1, OperationArgs.R, OperationArgs.N, InstructionMode.IAsBx, "FORLOOP "),
+            new OperationCode(0, 1, OperationArgs.R, OperationArgs.N, InstructionMode.IAsBx, "FORPREP "),
+            new OperationCode(0, 0, OperationArgs.N, OperationArgs.U, InstructionMode.IABC,  "TFORCALL"),
+            new OperationCode(0, 1, OperationArgs.R, OperationArgs.N, InstructionMode.IAsBx, "TFORLOOP"),
+            new OperationCode(0, 0, OperationArgs.U, OperationArgs.U, InstructionMode.IABC,  "SETLIST "),
+            new OperationCode(0, 1, OperationArgs.U, OperationArgs.N, InstructionMode.IABx,  "CLOSURE "),
+            new OperationCode(0, 1, OperationArgs.U, OperationArgs.N, InstructionMode.IABC,  "VARARG  "),
+            new OperationCode(0, 0, OperationArgs.U, OperationArgs.U, InstructionMode.IAx,   "EXTRAARG"),
+        };
+
+        internal static OperationCode Get(byte c)
+        {
+            return codes[c];
+        }
+    }
+
+    // 操作数
+    internal static class OperationArgs
+    {
+        internal const byte N = 0;
+        internal const byte U = 1;
+        internal const byte R = 2;
+        internal const byte K = 3;
     }
 }
