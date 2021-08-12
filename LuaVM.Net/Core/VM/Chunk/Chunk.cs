@@ -10,6 +10,7 @@ namespace LuaVM.Net.Core
             return null;
         }
 
+        // 反编译字节码
         public static Prototype Undump(byte[] bytes)
         {
             ChunkReader reader = new ChunkReader(bytes);

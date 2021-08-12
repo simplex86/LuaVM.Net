@@ -116,7 +116,7 @@ namespace LuaVM.Net
             var funcType = proto.lineDefined > 0 ? "function"  : "main";
             var varargFlag = proto.isVararg > 0 ? "+" : "";
 
-            Console.Write($"{funcType} <{proto.source}:{proto.lineDefined},{proto.lastLineDefined}> ({proto.code.Length} instruction)\n");
+            Console.Write($"{funcType} <{proto.source}:{proto.lineDefined},{proto.lastLineDefined}> ({proto.code.Length} instructions)\n");
             Console.Write($"{proto.numParams},{varargFlag} params, {proto.maxStackSize} slots, {proto.upvalues.Length} upvalues, ");
             Console.Write($"{proto.localVars.Length} locals, {proto.constants.Length} constants, {proto.protos.Length} functions\n");
         }
