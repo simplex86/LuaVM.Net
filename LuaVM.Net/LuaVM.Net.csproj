@@ -76,8 +76,12 @@
     <Compile Include="Core\Parser\Internals\StatementParsers\RepeatStatementParser.cs" />
     <Compile Include="Core\Parser\Internals\StatementParsers\WhileStatementParser.cs" />
     <Compile Include="Core\Parser\Parser.cs" />
+    <Compile Include="Core\VM\Api\LuaStack.cs" />
+    <Compile Include="Core\VM\Api\LuaState.cs" />
+    <Compile Include="Core\VM\Api\LuaValue.cs" />
     <Compile Include="Core\VM\Chunk\Chunk.cs" />
     <Compile Include="Core\VM\Chunk\ChunkReader.cs" />
+    <Compile Include="Core\VM\Const.cs" />
     <Compile Include="Core\VM\Instruction.cs" />
     <Compile Include="Core\VM\OperationCode.cs" />
     <Compile Include="Core\VM\Utils\ConvertUtils.cs" />
