@@ -23,6 +23,17 @@ namespace LuaVM.Net.Core
         }
 
         // 压栈
+        internal void Push()
+        {
+            if (top == capacity)
+            {
+                throw new Exception("stack overflow!");
+            }
+
+            slots.Add(new LuaValue());
+        }
+
+        // 压栈
         internal void Push(bool value)
         {
             if (top == capacity)
@@ -84,7 +95,7 @@ namespace LuaVM.Net.Core
         internal void Set(int idx, bool value)
         {
             idx = GetAbsIndex(idx);
-            if (idx < 0 || idx > top)
+            if (idx <= 0 || idx > top)
             {
                 throw new Exception("invalid stack index!");
             }
@@ -95,7 +106,7 @@ namespace LuaVM.Net.Core
         internal void Set(int idx, long value)
         {
             idx = GetAbsIndex(idx);
-            if (idx < 0 || idx > top)
+            if (idx <= 0 || idx > top)
             {
                 throw new Exception("invalid stack index!");
             }
@@ -106,7 +117,7 @@ namespace LuaVM.Net.Core
         internal void Set(int idx, double value)
         {
             idx = GetAbsIndex(idx);
-            if (idx < 0 || idx > top)
+            if (idx <= 0 || idx > top)
             {
                 throw new Exception("invalid stack index!");
             }
@@ -117,7 +128,7 @@ namespace LuaVM.Net.Core
         internal void Set(int idx, string value)
         {
             idx = GetAbsIndex(idx);
-            if (idx < 0 || idx > top)
+            if (idx <= 0 || idx > top)
             {
                 throw new Exception("invalid stack index!");
             }
@@ -128,7 +139,7 @@ namespace LuaVM.Net.Core
         internal LuaValue Get(int idx)
         {
             idx = GetAbsIndex(idx);
-            if (idx >= 0 && idx < top)
+            if (idx > 0 && idx <= top)
             {
                 return slots[idx - 1];
             }
@@ -140,7 +151,7 @@ namespace LuaVM.Net.Core
         internal bool IsValid(int idx)
         {
             idx = GetAbsIndex(idx);
-            return idx >= 0 && idx < top;
+            return idx > 0 && idx <= top;
         }
 
         // 反向

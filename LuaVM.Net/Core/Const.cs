@@ -230,6 +230,7 @@ namespace LuaVM.Net.Core
         }
     }
 
+    // 数据类型
     internal static class LuaType
     {
         public const int LUA_TNONE = -1; // no value

@@ -74,9 +74,13 @@ namespace LuaVM.Net.Core
             return value.type;
         }
 
+        // nil
         public LuaValue()
         {
-
+            value = new TValue
+            {
+                t = LuaType.LUA_TNIL
+            };
         }
 
         public LuaValue(bool b)

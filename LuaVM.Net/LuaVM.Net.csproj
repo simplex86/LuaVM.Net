@@ -87,6 +87,10 @@
     <Compile Include="Core\VM\Utils\ConvertUtils.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Test\TestLexer.cs" />
+    <Compile Include="Test\TestParser.cs" />
+    <Compile Include="Test\TestUndump.cs" />
+    <Compile Include="Test\TestValue.cs" />
     <Compile Include="Tools\LitJson\IJsonWrapper.cs" />
     <Compile Include="Tools\LitJson\JsonData.cs" />
     <Compile Include="Tools\LitJson\JsonException.cs" />

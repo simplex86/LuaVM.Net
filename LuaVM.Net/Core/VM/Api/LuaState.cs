@@ -33,26 +33,31 @@ namespace LuaVM.Net.Core
             }
         }
 
+        // 压入nil
         public void Push()
         {
-            stack.Push(null);
+            stack.Push();
         }
 
+        // 压入布尔值
         public void Push(bool b)
         {
             stack.Push(b);
         }
 
+        // 压入整数
         public void Push(long n)
         {
             stack.Push(n);
         }
 
+        // 压入小数（浮点数）
         public void Push(double n)
         {
             stack.Push(n);
         }
 
+        // 压入字符串
         public void Push(string s)
         {
             stack.Push(s);
