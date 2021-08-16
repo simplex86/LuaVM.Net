@@ -63,14 +63,14 @@ namespace LuaVM.Net.Core
         {
             switch (type)
             {
-                case ValueType.LUA_TNONE:     return "no value";
-                case ValueType.LUA_TNIL:      return "nil";
-                case ValueType.LUA_TBOOLEAN:  return "boolean";
-                case ValueType.LUA_TNUMBER:   return "number";
-                case ValueType.LUA_TSTRING:   return "string";
-                case ValueType.LUA_TTABLE:    return "table";
-                case ValueType.LUA_TFUNCTION: return "function";
-                case ValueType.LUA_TTHREAD:   return "thread";
+                case LuaType.LUA_TNONE:     return "no value";
+                case LuaType.LUA_TNIL:      return "nil";
+                case LuaType.LUA_TBOOLEAN:  return "boolean";
+                case LuaType.LUA_TNUMBER:   return "number";
+                case LuaType.LUA_TSTRING:   return "string";
+                case LuaType.LUA_TTABLE:    return "table";
+                case LuaType.LUA_TFUNCTION: return "function";
+                case LuaType.LUA_TTHREAD:   return "thread";
                 default: return "userdata";
             }
         }
@@ -84,19 +84,19 @@ namespace LuaVM.Net.Core
                 return v.type;
             }
 
-            return ValueType.LUA_TNONE;
+            return LuaType.LUA_TNONE;
         }
 
         // 判断索引位置是否为none
         public bool IsNone(int idx)
         {
-            return Type(idx) == ValueType.LUA_TNONE;
+            return Type(idx) == LuaType.LUA_TNONE;
         }
 
         // 判断索引位置是否为nil
         public bool IsNil(int idx)
         {
-            return Type(idx) == ValueType.LUA_TNIL;
+            return Type(idx) == LuaType.LUA_TNIL;
         }
 
         // 判断索引位置是否为none或nil
@@ -108,28 +108,134 @@ namespace LuaVM.Net.Core
         // 判断索引位置是否为bool类型
         public bool IsBoolean(int idx)
         {
-            return Type(idx) == ValueType.LUA_TBOOLEAN;
+            return Type(idx) == LuaType.LUA_TBOOLEAN;
         }
 
         // 判断索引位置是否为字符串或数字类型
         public bool IsString(int idx)
         {
             var t = Type(idx);
-            return t == ValueType.LUA_TSTRING || t == ValueType.LUA_TNUMBER;
+            return t == LuaType.LUA_TSTRING || t == LuaType.LUA_TNUMBER;
         }
 
         // 判断索引位置是否为（或可转换为）数字类型
         public bool IsNumber(int idx)
         {
-            // TODO 待实现
-            return false;
+            var value = stack.Get(idx);
+            return value.IsFloat();
         }
 
         // 判断索引位置是否为整数类型
         public bool IsInteger(int idx)
         {
-            // TODO 待实现
-            return false;
+            var value = stack.Get(idx);
+            return value.IsInteger();
+        }
+
+        public bool ToBoolean(int idx)
+        {
+            var value = stack.Get(idx);
+            return ToBoolean(value);
+        }
+
+        private bool ToBoolean(LuaValue value)
+        {
+            if (value.type == LuaType.LUA_TNIL)
+            {
+                return false;
+            }
+            if (value.type == LuaType.LUA_TBOOLEAN)
+            {
+                return value.GetBoolean();
+            }
+
+            return true;
+        }
+
+        public double ToNumber(int idx)
+        {
+            var value = stack.Get(idx);
+            return ToNumber(value);
+        }
+
+        private double ToNumber(LuaValue value)
+        {
+            if (value.IsFloat())
+            {
+                return value.GetFloat();
+            }
+            if (value.IsInteger())
+            {
+                var n = value.GetInteger();
+                return (double)n;
+            }
+            if (value.type == LuaType.LUA_TSTRING)
+            {
+                var s = value.GetString();
+                double n = 0.0;
+                if (double.TryParse(s, out n))
+                {
+                    return n;
+                }
+            }
+
+            return 0.0;
+        }
+
+        public long ToInteger(int idx)
+        {
+            var value = stack.Get(idx);
+            return ToInteger(value);
+        }
+
+        private long ToInteger(LuaValue value)
+        {
+            if (value.IsFloat())
+            {
+                return value.GetInteger();
+            }
+            if (value.IsInteger())
+            {
+                var n = value.GetFloat();
+                return (int)n;
+            }
+            if (value.type == LuaType.LUA_TSTRING)
+            {
+                var s = value.GetString();
+                long n = 0;
+                if (long.TryParse(s, out n))
+                {
+                    return n;
+                }
+            }
+
+            return 0;
+        }
+
+        public string ToString(int idx)
+        {
+            var value = stack.Get(idx);
+            return ToString(value);
+        }
+
+        private string ToString(LuaValue value)
+        {
+            if (value.type == LuaType.LUA_TSTRING)
+            {
+                return value.GetString();
+            }
+            if (value.IsFloat())
+            {
+                var n = value.GetInteger();
+                return n.ToString();
+            }
+            if (value.IsInteger())
+            {
+                var n = value.GetFloat();
+                return n.ToString();
+            }
+
+            return string.Empty;
         }
     }
 }

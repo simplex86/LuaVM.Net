@@ -48,13 +48,25 @@ namespace LuaVM.Net.Core
     internal class TValue
     {
         public CValue v = new CValue();
-        public int t = ValueType.LUA_TNONE;
+        public int t = LuaType.LUA_TNONE;
     }
 
     // lua的数据定义
     internal class LuaValue
     {
         private TValue value = null;
+
+        // 类型的组成
+        // 0-3：主类型
+        // 4-5：子类型（整数、小数；短字符串，长字符串；等等）
+        // 6~N：是否可以被GC
+        private const int LUA_TYPE_MASK             = 0x3F; // 类型位模板
+        private const int LUA_LUATYPE_MASK          = 0x0F; // 主类型位模板
+        private const int LUA_SUBTYPE_MASK          = 0x30; // 子类型位模板
+        private const int LUA_SUBTYPE_INTEGER_NUM   = 0x10; // 整数
+        private const int LUA_SUBTYPE_FLOAT_NUM     = 0x20; // 小数
+        private const int LUA_SUBTYPE_SHORT_STR     = 0x10; // 短字符串
+        private const int LUA_SUBTYPE_LONG_STR      = 0x20; // 长字符串
 
         // 获取类型
         public static int GetType(LuaValue value)
@@ -90,7 +102,7 @@ namespace LuaVM.Net.Core
         // 获取数据类型
         public int type
         {
-            get { return (value == null) ? ValueType.LUA_TNIL : value.t; }
+            get { return (value == null) ? LuaType.LUA_TNIL : value.t & LUA_LUATYPE_MASK; }
         }
 
         // 设值
@@ -101,7 +113,7 @@ namespace LuaVM.Net.Core
                 value = new TValue();
             }
             value.v.Set(b);
-            value.t = ValueType.LUA_TBOOLEAN;
+            value.t = LuaType.LUA_TBOOLEAN;
         }
 
         // 设值
@@ -112,7 +124,7 @@ namespace LuaVM.Net.Core
                 value = new TValue();
             }
             value.v.Set(n);
-            value.t = ValueType.LUA_TNUMBER;
+            value.t = LuaType.LUA_TNUMBER | LUA_SUBTYPE_INTEGER_NUM;
         }
 
         // 设值
@@ -123,7 +135,7 @@ namespace LuaVM.Net.Core
                 value = new TValue();
             }
             value.v.Set(n);
-            value.t = ValueType.LUA_TNUMBER;
+            value.t = LuaType.LUA_TNUMBER | LUA_SUBTYPE_FLOAT_NUM;
         }
 
         // 设值
@@ -134,7 +146,70 @@ namespace LuaVM.Net.Core
                 value = new TValue();
             }
             value.v.Set(s);
-            value.t = ValueType.LUA_TSTRING;
+            value.t = LuaType.LUA_TSTRING;
+        }
+
+        public bool GetBoolean()
+        {
+            return u.b;
+        }
+
+        public long GetInteger()
+        {
+            return u.i;
+        }
+
+        public double GetFloat()
+        {
+            return u.f;
+        }
+
+        public string GetString()
+        {
+            return o as string;
+        }
+
+        // 是否为数字（整数或小数）
+        public bool IsNumber()
+        {
+            if (value == null)
+            {
+                return false;
+            }
+
+            return type == LuaType.LUA_TNUMBER;
+        }
+
+        // 是否为整数
+        public bool IsInteger()
+        {
+            if (!IsNumber())
+            {
+                return false;
+            }
+
+            return (value.t & LUA_SUBTYPE_MASK) == LUA_SUBTYPE_INTEGER_NUM;
+        }
+
+        // 是否为小数
+        public bool IsFloat()
+        {
+            if (!IsNumber())
+            {
+                return false;
+            }
+
+            return (value.t & LUA_SUBTYPE_MASK) == LUA_SUBTYPE_FLOAT_NUM;
+        }
+
+        private UValue u
+        {
+            get { return value.v.u; }
+        }
+
+        private object o
+        {
+            get { return value.v.o; }
         }
     }
 }

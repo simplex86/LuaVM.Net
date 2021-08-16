@@ -230,9 +230,9 @@ namespace LuaVM.Net.Core
         }
     }
 
-    internal static class ValueType
+    internal static class LuaType
     {
-        public const int LUA_TNONE = -1;
+        public const int LUA_TNONE = -1; // no value
         public const int LUA_TNIL = 0;
         public const int LUA_TBOOLEAN = 1;
         public const int LUA_TLIGHTUSERDATA = 2;
