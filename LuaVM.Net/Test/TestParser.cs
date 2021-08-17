@@ -22,10 +22,10 @@ namespace LuaVM.Net
             var lexer = new Lexer(filename, lua, 1);
             var parser = new Parser();
 
-            Console.WriteLine("parser:");
+            Console.WriteLine("parser test:");
             var block = parser.Parse(lexer);
             PrintBlock(block);
-            Console.WriteLine("parser done!");
+            Console.WriteLine("parser test done!");
         }
 
         // 获取工程路径

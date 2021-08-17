@@ -94,45 +94,36 @@ namespace LuaVM.Net.Core
         // 设置指定索引位置的值
         internal void Set(int idx, bool value)
         {
-            idx = GetAbsIndex(idx);
-            if (idx <= 0 || idx > top)
-            {
-                throw new Exception("invalid stack index!");
-            }
-            slots[idx - 1] = new LuaValue(value);
+            Set(idx, new LuaValue(value));
         }
 
         // 设置指定索引位置的值
         internal void Set(int idx, long value)
         {
-            idx = GetAbsIndex(idx);
-            if (idx <= 0 || idx > top)
-            {
-                throw new Exception("invalid stack index!");
-            }
-            slots[idx - 1] = new LuaValue(value);
+            Set(idx, new LuaValue(value));
         }
 
         // 设置指定索引位置的值
         internal void Set(int idx, double value)
         {
-            idx = GetAbsIndex(idx);
-            if (idx <= 0 || idx > top)
-            {
-                throw new Exception("invalid stack index!");
-            }
-            slots[idx - 1] = new LuaValue(value);
+            Set(idx, new LuaValue(value));
         }
 
         // 设置指定索引位置的值
         internal void Set(int idx, string value)
+        {
+            Set(idx, new LuaValue(value));
+        }
+
+        // 设置指定索引位置的值
+        internal void Set(int idx, LuaValue value)
         {
             idx = GetAbsIndex(idx);
             if (idx <= 0 || idx > top)
             {
                 throw new Exception("invalid stack index!");
             }
-            slots[idx - 1] = new LuaValue(value);
+            slots[idx - 1] = value;
         }
 
         // 获取指定索引位置的值
@@ -168,7 +159,7 @@ namespace LuaVM.Net.Core
         // 获取（正数）索引值
         internal int GetAbsIndex(int idx)
         {
-            return (idx > 0) ? idx : idx + top;
+            return (idx > 0) ? idx : idx + top + 1;
         }
 
         // 栈顶索引值

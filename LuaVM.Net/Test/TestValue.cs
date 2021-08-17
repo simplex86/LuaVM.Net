@@ -8,14 +8,19 @@ namespace LuaVM.Net
     {
         public void Do()
         {
-            Console.WriteLine("values:");
+            Console.WriteLine("value test:");
             var state = new LuaState();
-            state.Push();       PrintState(state);
+            
             state.Push(true);   PrintState(state);
             state.Push(123);    PrintState(state);
-            state.Push(456.0);  PrintState(state);
+            state.Push();       PrintState(state);
             state.Push("abc");  PrintState(state);
-            Console.WriteLine("value done!");
+            state.Push(-456);   PrintState(state);
+            state.Replace(3);   PrintState(state);
+            state.SetTop(6);    PrintState(state);
+            state.Remove(-3);   PrintState(state);
+            state.SetTop(-5);   PrintState(state);
+            Console.WriteLine("value test done!");
         }
 
         private void PrintState(LuaState state)

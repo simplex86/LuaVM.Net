@@ -20,9 +20,9 @@ namespace LuaVM.Net
             }
 
             var lexer = new Lexer(filename, lua, 1);
-            Console.WriteLine("lexer:");
+            Console.WriteLine("lexer test:");
             PrintLexer(lexer);
-            Console.WriteLine("lexer done!");
+            Console.WriteLine("lexer test done!");
         }
 
         // 获取工程路径

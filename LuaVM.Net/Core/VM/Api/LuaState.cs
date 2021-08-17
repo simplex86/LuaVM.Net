@@ -13,6 +13,33 @@ namespace LuaVM.Net.Core
             return stack.top;
         }
 
+        // 设置栈顶
+        public void SetTop(int idx)
+        {
+            var top = stack.GetAbsIndex(idx);
+            if (top < 0)
+            {
+                Error.Commit("stack underflow");
+                return;
+            }
+
+            var n = stack.top - top;
+            if (n > 0)
+            {
+                for (int i=0; i<n; i++)
+                {
+                    stack.Pop();
+                }
+            }
+            else if (n < 0)
+            {
+                for (int i = 0; i > n; i--)
+                {
+                    stack.Push();
+                }
+            }
+        }
+
         // 转换为绝对索引
         public int AbsIndex(int index)
         {
@@ -61,6 +88,45 @@ namespace LuaVM.Net.Core
         public void Push(string s)
         {
             stack.Push(s);
+        }
+
+        // 将栈顶弹出，然后插入到指定位置
+        public void Insert(int idx)
+        {
+            Rotate(idx, 1);
+        }
+
+        // 从from位置复制到to位置
+        public void Copy(int from, int to)
+        {
+            var value = stack.Get(from);
+            stack.Set(to, value);
+        }
+
+        //
+        public void Rotate(int idx, int n)
+        {
+            var t = stack.top - 1;
+            var p = stack.GetAbsIndex(idx) - 1;
+
+            var m = (n >= 0) ? (t - n) : (p - n - 1);
+            stack.Reverse(p, m);
+            stack.Reverse(m + 1, t);
+            stack.Reverse(p, t);
+        }
+
+        // 删除idx位置的值，并将该位置上面的值全部下移
+        public void Remove(int idx)
+        {
+            Rotate(idx, -1);
+            Pop(1);
+        }
+
+        // 将栈顶弹出，再插入到指定位置
+        public void Replace(int idx)
+        {
+            var value = stack.Pop();
+            stack.Set(idx, value);
         }
 
         // 获取类型名字

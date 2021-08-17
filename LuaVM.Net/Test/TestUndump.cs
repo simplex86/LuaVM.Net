@@ -13,11 +13,11 @@ namespace LuaVM.Net
             var rootpath = GetProjectPath();
             filename = Path.Combine(rootpath, filename);
 
-            Console.WriteLine("luavm:");
+            Console.WriteLine("undump test:");
             var bytes = File.ReadAllBytes(filename);
             var proto = Chunk.Undump(bytes);
             PrintProto(proto);
-            Console.WriteLine("luavm done!");
+            Console.WriteLine("undump test done!");
         }
 
         // 获取工程路径
