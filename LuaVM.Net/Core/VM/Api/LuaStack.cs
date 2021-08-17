@@ -25,56 +25,46 @@ namespace LuaVM.Net.Core
         // 压栈
         internal void Push()
         {
-            if (top == capacity)
-            {
-                throw new Exception("stack overflow!");
-            }
-
-            slots.Add(new LuaValue());
+            Push(new LuaValue());
         }
 
         // 压栈
         internal void Push(bool value)
         {
-            if (top == capacity)
-            {
-                throw new Exception("stack overflow!");
-            }
-
-            slots.Add(new LuaValue(value));
+            Push(new LuaValue(value));
         }
 
         // 压栈
         internal void Push(long value)
         {
-            if (top == capacity)
-            {
-                throw new Exception("stack overflow!");
-            }
-
-            slots.Add(new LuaValue(value));
+            Push(new LuaValue(value));
         }
 
         // 压栈
         internal void Push(double value)
         {
-            if (top == capacity)
-            {
-                throw new Exception("stack overflow!");
-            }
-
-            slots.Add(new LuaValue(value));
+            Push(new LuaValue(value));
         }
 
         // 压栈
         internal void Push(string value)
+        {
+            Push(new LuaValue(value));
+        }
+
+        internal void Push(LuaValue value)
         {
             if (top == capacity)
             {
                 throw new Exception("stack overflow!");
             }
 
-            slots.Add(new LuaValue(value));
+            if (value == null)
+            {
+                value = new LuaValue();
+            }
+
+            slots.Add(value);
         }
 
         // 出栈

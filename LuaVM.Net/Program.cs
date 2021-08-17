@@ -8,7 +8,7 @@ namespace LuaVM.Net
     {
         static void Main(string[] args)
         {
-            TestValue();
+            TestOperations();
             // pause
             Console.Write("\npress any key to be continue...");
             Console.ReadKey();
@@ -39,6 +39,12 @@ namespace LuaVM.Net
         static void TestValue()
         {
             var test = new TestValue();
+            test.Do();
+        }
+
+        static void TestOperations()
+        {
+            var test = new TestOperations();
             test.Do();
         }
     }

@@ -173,6 +173,17 @@ namespace LuaVM.Net.Core
             return o as string;
         }
 
+        // 是否为布尔类型
+        public bool IsBoolean()
+        {
+            if (value == null)
+            {
+                return false;
+            }
+
+            return type == LuaType.LUA_TBOOLEAN;
+        }
+
         // 是否为数字（整数或小数）
         public bool IsNumber()
         {
@@ -204,6 +215,91 @@ namespace LuaVM.Net.Core
             }
 
             return (value.t & LUA_SUBTYPE_MASK) == LUA_SUBTYPE_FLOAT_NUM;
+        }
+
+        // 是否为字符串
+        public bool IsString()
+        {
+            if (value == null)
+            {
+                return false;
+            }
+
+            return type == LuaType.LUA_TSTRING;
+        }
+
+        public static Tuple<long, bool> ToInteger(LuaValue value)
+        {
+            if (value.IsInteger())
+            {
+                var n = value.GetInteger();
+                return Tuple.Create(n, true);
+            }
+            if (value.IsFloat())
+            {
+                var n = (long)value.GetFloat();
+                return Tuple.Create(n, true);
+            }
+
+            if (value.IsString())
+            {
+                var s = value.GetString();
+                long n = 0;
+                if (long.TryParse(s, out n))
+                {
+                    return Tuple.Create(n, true);
+                }
+            }
+
+            return Tuple.Create(0L, false);
+        }
+
+        public static Tuple<double, bool> ToFloat(LuaValue value)
+        {
+            if (value.IsInteger())
+            {
+                var n = (double)value.GetInteger();
+                return Tuple.Create(n, true);
+            }
+            if (value.IsFloat())
+            {
+                var n = value.GetFloat();
+                return Tuple.Create(n, true);
+            }
+
+            if (value.IsString())
+            {
+                var s = value.GetString();
+                double n = 0;
+                if (double.TryParse(s, out n))
+                {
+                    return Tuple.Create(n, true);
+                }
+            }
+
+            return Tuple.Create(0.0, false);
+        }
+
+        public static Tuple<string, bool> ToString(LuaValue value)
+        {
+            if (value.IsString())
+            {
+                var s = value.GetString();
+                 return Tuple.Create(s, true);
+            }
+
+            if (value.IsInteger())
+            {
+                var s = value.GetInteger().ToString();
+                return Tuple.Create(s, true);
+            }
+            if (value.IsFloat())
+            {
+                var s = value.GetFloat().ToString();
+                return Tuple.Create(s, true);
+            }
+
+            return Tuple.Create("", false);
         }
 
         private UValue u

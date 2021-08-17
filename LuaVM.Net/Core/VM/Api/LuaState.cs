@@ -308,5 +308,78 @@ namespace LuaVM.Net.Core
 
             return string.Empty;
         }
+
+        // 比较指定位置上的两个值
+        public bool Compare(int idx1, int idx2, int op)
+        {
+            var a = stack.Get(idx1);
+            var b = stack.Get(idx2);
+            return Core.Compare.Do(a, b, op);
+        }
+
+        public void Arithmetic(int op)
+        {
+            var b = stack.Pop();
+            var a = b;
+
+            if (op != Operations.LUA_OPUNM && op != Operations.LUA_OPBNOT)
+            {
+                a = stack.Pop();
+            }
+
+            var r = Core.Arithmetic.Do(a, b, op);
+            if (r == null)
+            {
+                Error.Commit("arithmetic error!");
+                return;
+            }
+            stack.Push(r);
+        }
+
+        // 长度
+        public void Len(int idx)
+        {
+            var v = stack.Get(idx);
+            if (v.IsString())
+            {
+                var n = String.Len(v);
+                stack.Push(n);
+            }
+            else
+            {
+                Error.Commit("string length error!");
+            }
+        }
+
+        // 连接
+        public void Concat(int n)
+        {
+            if (n == 0)
+            {
+                stack.Push();
+                return;
+            }
+
+            if (n >= 2)
+            {
+                for (var i = 1; i < n; i++)
+                {
+                    if (IsString(-1) && IsString(-2))
+                    {
+                        var b = stack.Get(-1);
+                        var a = stack.Get(-2);
+
+                        stack.Pop();
+                        stack.Pop();
+
+                        var s = String.Concat(a, b);
+                        stack.Push(s);
+
+                        continue;
+                    }
+                    Error.Commit("string concatenation error!");
+                }
+            }
+        }
     }
 }
