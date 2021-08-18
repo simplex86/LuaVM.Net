@@ -5,7 +5,26 @@ namespace LuaVM.Net.Core
 {
     public class LuaState
     {
-        private LuaStack stack = new LuaStack(20);
+        private LuaStack  stack;
+        private Prototype proto;
+
+        public int pc { get; private set; } = 0;
+
+        public LuaState()
+        {
+            this.stack = new LuaStack(32);
+        }
+
+        public LuaState(int size)
+        {
+            this.stack = new LuaStack(size);
+        }
+
+        public LuaState(int size, Prototype proto)
+        {
+            this.stack = new LuaStack(size);
+            this.proto = proto;
+        }
 
         // 获取栈顶索引值
         public int GetTop()
@@ -52,12 +71,10 @@ namespace LuaVM.Net.Core
             return true;
         }
 
+        // 弹出栈顶
         public void Pop(int n)
         {
-            for (int i=0; i<n; i++)
-            {
-                stack.Pop();
-            }
+            SetTop(-n - 1);
         }
 
         // 压入nil
@@ -88,6 +105,13 @@ namespace LuaVM.Net.Core
         public void Push(string s)
         {
             stack.Push(s);
+        }
+
+        // 把指定位置的压入栈顶
+        public void PushX(int idx)
+        {
+            var v = stack.Get(idx);
+            stack.Push(v);
         }
 
         // 将栈顶弹出，然后插入到指定位置
@@ -152,7 +176,7 @@ namespace LuaVM.Net.Core
             if (stack.IsValid(idx))
             {
                 var v = stack.Get(idx);
-                return v.type;
+                return LuaValue.GetType(v);
             }
 
             return LuaType.LUA_TNONE;
@@ -379,6 +403,51 @@ namespace LuaVM.Net.Core
                     }
                     Error.Commit("string concatenation error!");
                 }
+            }
+        }
+
+        // 增加PC
+        public void AddPC(int n)
+        {
+            pc += n;
+        }
+
+        // 取出当前指令，并将PC指向下一条指令
+        public uint Fetch()
+        {
+            var inst = proto.code[pc];
+            pc++;
+            return inst;
+        }
+
+        // 将指定位置的常量压到栈顶
+        public void PushConst(int idx)
+        {
+            var c = proto.constants[idx];
+            switch (c.GetType().Name)
+            {
+                case "Int64":
+                    stack.Push((long)c);
+                    break;
+                case "Double":
+                    stack.Push((double)c);
+                    break;
+                case "String":
+                    stack.Push(c as string);
+                    break;
+            }
+        }
+
+        // 将指定位置的常量或栈值压到栈顶
+        public void PushRK(int rk)
+        {
+            if (rk > 0xFF)
+            {
+                PushConst(rk & 0xFF);
+            }
+            else
+            {
+                PushX(rk + 1);
             }
         }
     }

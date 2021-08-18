@@ -9,7 +9,7 @@ namespace LuaVM.Net
         public void Do()
         {
             Console.WriteLine("value test:");
-            var state = new LuaState();
+            var state = new LuaState(16);
             
             state.Push(true);   PrintState(state);
             state.Push(123);    PrintState(state);

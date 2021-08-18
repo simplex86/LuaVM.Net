@@ -83,6 +83,7 @@
     <Compile Include="Core\VM\Api\LuaState.cs" />
     <Compile Include="Core\VM\Api\LuaValue.cs" />
     <Compile Include="Core\VM\Api\String.cs" />
+    <Compile Include="Core\VM\Api\VM.cs" />
     <Compile Include="Core\VM\Chunk\Chunk.cs" />
     <Compile Include="Core\VM\Chunk\ChunkReader.cs" />
     <Compile Include="Core\VM\Const.cs" />
@@ -96,6 +97,7 @@
     <Compile Include="Test\TestParser.cs" />
     <Compile Include="Test\TestUndump.cs" />
     <Compile Include="Test\TestValue.cs" />
+    <Compile Include="Test\TestVM.cs" />
     <Compile Include="Tools\LitJson\IJsonWrapper.cs" />
     <Compile Include="Tools\LitJson\JsonData.cs" />
     <Compile Include="Tools\LitJson\JsonException.cs" />

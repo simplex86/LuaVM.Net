@@ -71,6 +71,11 @@ namespace LuaVM.Net.Core
         // 获取类型
         public static int GetType(LuaValue value)
         {
+            if (value == null)
+            {
+                return LuaType.LUA_TNIL;
+            }
+
             return value.type;
         }
 

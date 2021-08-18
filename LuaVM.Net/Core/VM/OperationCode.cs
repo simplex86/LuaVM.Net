@@ -3,6 +3,8 @@ using System.Collections.Generic;
 
 namespace LuaVM.Net.Core
 {
+    using Invoke = Action<Instruction, LuaState>;
+
     // 操作码
     struct OperationCode
     {
@@ -12,13 +14,15 @@ namespace LuaVM.Net.Core
         internal byte argCMode;
         internal byte opMode;
         internal string name;
+        internal Invoke invoke;
 
         public OperationCode(byte testFlag, 
                              byte aFlag, 
                              byte argBMode, 
                              byte argCMode, 
                              byte opMode, 
-                             string name)
+                             string name,
+                             Invoke invoke)
         {
             this.testFlag = testFlag;
             this.setAFlag = aFlag;
@@ -26,6 +30,7 @@ namespace LuaVM.Net.Core
             this.argCMode = argCMode;
             this.opMode = opMode;
             this.name = name;
+            this.invoke = invoke;
         }
     }
 }

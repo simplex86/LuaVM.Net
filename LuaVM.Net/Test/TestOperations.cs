@@ -8,7 +8,7 @@ namespace LuaVM.Net
     {
         public void Do()
         {
-            var state = new LuaState();
+            var state = new LuaState(16);
             state.Push(1);
             state.Push("2.0");
             state.Push("3.0");

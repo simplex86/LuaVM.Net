@@ -8,7 +8,7 @@ namespace LuaVM.Net
     {
         static void Main(string[] args)
         {
-            TestOperations();
+            TestVM();
             // pause
             Console.Write("\npress any key to be continue...");
             Console.ReadKey();
@@ -46,6 +46,13 @@ namespace LuaVM.Net
         {
             var test = new TestOperations();
             test.Do();
+        }
+
+        // 执行字节反编译器的测试
+        static void TestVM()
+        {
+            var test = new TestVM();
+            test.Do(@"Luas\vm.out");
         }
     }
 }

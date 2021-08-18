@@ -81,5 +81,21 @@ namespace LuaVM.Net.Core
         {
             return (int)(data >> 6);
         }
+
+        public void Execute(LuaState state)
+        {
+            var code = OpCode();
+            var invoke = OperationCodes.Get(code).invoke;
+
+            if (invoke != null)
+            {
+                invoke(this, state);
+            }
+            else
+            {
+                var name = OpName();
+                Error.Commit($"instruction [{name}] execute exception!");
+            }
+        }
     }
 }

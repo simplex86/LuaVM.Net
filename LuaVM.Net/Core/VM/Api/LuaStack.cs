@@ -10,6 +10,11 @@ namespace LuaVM.Net.Core
         internal LuaStack(int n)
         {
             slots = new List<LuaValue>(n);
+            for (int i=0; i<n; i++)
+            {
+                slots.Add(null);
+            }
+            top = 0;
         }
 
         // 检查栈是否可容纳n个数据，如果容纳不了则扩容
@@ -18,7 +23,11 @@ namespace LuaVM.Net.Core
             var m = capacity - top;
             if (m < n)
             {
-                capacity += m;
+                capacity = top + n;
+                for (int i = 0; i < n; i++)
+                {
+                    slots.Add(null);
+                }
             }
         }
 
@@ -64,19 +73,21 @@ namespace LuaVM.Net.Core
                 value = new LuaValue();
             }
 
-            slots.Add(value);
+            slots[top] = value;
+            top++;
         }
 
         // 出栈
         internal LuaValue Pop()
         {
-            if (top == 0)
+            if (top < 1)
             {
                 throw new Exception("stack overflow!");
             }
 
-            var v = slots[top - 1];
-            slots.RemoveAt(top - 1);
+            top--;
+            var v = slots[top];
+            slots[top] = null;
 
             return v;
         }
@@ -153,10 +164,7 @@ namespace LuaVM.Net.Core
         }
 
         // 栈顶索引值
-        internal int top
-        {
-            get { return slots.Count; }
-        }
+        internal int top { get; private set; }
 
         // 栈的容量
         private int capacity
