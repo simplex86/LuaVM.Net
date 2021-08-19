@@ -21,7 +21,7 @@ namespace LuaVM.Net.Core
 
         public static void CheckHeader(ChunkReader reader)
         {
-            if (ConvertUtils.Bytes2String(reader.ReadBytes(4)) != ChunkValues.LUA_SIGNATURE)
+            if (Convert.Bytes2String(reader.ReadBytes(4)) != ChunkValues.LUA_SIGNATURE)
             {
                 Console.WriteLine("not a precompiled chunk!");
             }
@@ -36,7 +36,7 @@ namespace LuaVM.Net.Core
                 Console.WriteLine("format mismatch!");
             }
 
-            if (ConvertUtils.Bytes2String(reader.ReadBytes(6)) != ChunkValues.LUAC_DATA)
+            if (Convert.Bytes2String(reader.ReadBytes(6)) != ChunkValues.LUAC_DATA)
             {
                 Console.WriteLine("corrupted!");
             }

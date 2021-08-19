@@ -4,7 +4,7 @@ using System.Text;
 
 namespace LuaVM.Net.Core
 {
-    public static class ConvertUtils
+    public static class Convert
     {
         public static string Bytes2String(byte[] bytes)
         {

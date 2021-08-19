@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Linq;
+using System.Text;
 
 namespace LuaVM.Net.Core
 {
@@ -214,7 +214,7 @@ namespace LuaVM.Net.Core
             }
 
             var b = ReadBytes(size - 1);
-            return ConvertUtils.Bytes2String(b);
+            return Convert.Bytes2String(b);
         }
     }
 }

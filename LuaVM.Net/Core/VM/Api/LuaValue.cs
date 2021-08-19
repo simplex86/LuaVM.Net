@@ -69,7 +69,7 @@ namespace LuaVM.Net.Core
         private const int LUA_SUBTYPE_LONG_STR      = 0x20; // 长字符串
 
         // 获取类型
-        public static int GetType(LuaValue value)
+        internal static int GetType(LuaValue value)
         {
             if (value == null)
             {
@@ -77,6 +77,28 @@ namespace LuaVM.Net.Core
             }
 
             return value.type;
+        }
+
+        internal static int GetHash(LuaValue value)
+        {
+            if (value.IsBoolean())
+            {
+                return Hash.Get(value.GetBoolean());
+            }
+            if (value.IsInteger())
+            {
+                return Hash.Get(value.GetInteger());
+            }
+            if (value.IsFloat())
+            {
+                return Hash.Get(value.GetFloat());
+            }
+            if (value.IsString())
+            {
+                return Hash.Get(value.GetString());
+            }
+
+            return 0;
         }
 
         // nil
@@ -176,6 +198,17 @@ namespace LuaVM.Net.Core
         public string GetString()
         {
             return o as string;
+        }
+
+        // 是否为nil
+        public bool IsNil()
+        {
+            if (value == null)
+            {
+                return true;
+            }
+
+            return type == LuaType.LUA_TNIL;
         }
 
         // 是否为布尔类型

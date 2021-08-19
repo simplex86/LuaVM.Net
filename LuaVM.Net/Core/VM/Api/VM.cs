@@ -6,6 +6,7 @@ namespace LuaVM.Net.Core
     internal static class VM
     {
         // MOVE
+        // A B      R(A) := R(B)
         internal static void Move(Instruction i, LuaState ls)
         {
             var t = i.ABC();
@@ -15,6 +16,7 @@ namespace LuaVM.Net.Core
         }
 
         // JMP
+        // sBx      pc += sBx
         internal static void Jump(Instruction i, LuaState ls)
         {
             var t = i.AsBx();
@@ -29,6 +31,7 @@ namespace LuaVM.Net.Core
         }
 
         // LOADNIL
+        // A B      R(A), R(A+1), ..., R(A+B) := nil
         internal static void LoadNil(Instruction i, LuaState ls)
         {
             var t = i.ABC();
@@ -45,6 +48,7 @@ namespace LuaVM.Net.Core
         }
 
         // LOADBOOL
+        // A B C    R(A) := (Bool)B; if(C) pc++
         internal static void LoadBoolean(Instruction i, LuaState ls)
         {
             var t = i.ABC();
@@ -61,6 +65,7 @@ namespace LuaVM.Net.Core
         }
 
         // LOADK
+        // A Bx     R(A) := Kst(Bx)
         internal static void LoadK(Instruction i, LuaState ls)
         {
             var t = i.ABx();
@@ -72,6 +77,7 @@ namespace LuaVM.Net.Core
         }
 
         // LOADKX
+        // A        R(A) := Kst(extra arg)
         internal static void LoadKx(Instruction i, LuaState ls)
         {
             var t = i.ABx();
@@ -109,77 +115,106 @@ namespace LuaVM.Net.Core
             ls.Replace(a);
         }
 
+        // ADD
+        // A B C    R(A) := RK(B) + RK(C)
         internal static void Add(Instruction i, LuaState ls)
         {
             BinaryOp(i, ls, Operations.LUA_OPADD);
         }
 
+        // SUB
+        // A B C    R(A) := RK(B) - RK(C)
         internal static void Sub(Instruction i, LuaState ls)
         {
             BinaryOp(i, ls, Operations.LUA_OPSUB);
         }
 
+        // MUL
+        // A B C	R(A) := RK(B) * RK(C)
         internal static void Mul(Instruction i, LuaState ls)
         {
             BinaryOp(i, ls, Operations.LUA_OPMUL);
         }
 
+        // MOD
+        // A B C	R(A) := RK(B) % RK(C)
         internal static void Mod(Instruction i, LuaState ls)
         {
             BinaryOp(i, ls, Operations.LUA_OPMOD);
         }
 
+        // POW
+        // A B C	R(A) := RK(B) ^ RK(C)
         internal static void Pow(Instruction i, LuaState ls)
         {
             BinaryOp(i, ls, Operations.LUA_OPPOW);
         }
 
+        // DIV
+        // A B C	R(A) := RK(B) / RK(C)
         internal static void Div(Instruction i, LuaState ls)
         {
             BinaryOp(i, ls, Operations.LUA_OPDIV);
         }
 
+        // IDIV
+        // A B C	R(A) := RK(B) // RK(C)
         internal static void IDiv(Instruction i, LuaState ls)
         {
             BinaryOp(i, ls, Operations.LUA_OPIDIV);
         }
 
+        // BAND
+        // A B C	R(A) := RK(B) & RK(C)
         internal static void BAnd(Instruction i, LuaState ls)
         {
             BinaryOp(i, ls, Operations.LUA_OPBAND);
         }
 
+        // BOR
+        // A B C	R(A) := RK(B) | RK(C)
         internal static void BOr(Instruction i, LuaState ls)
         {
             BinaryOp(i, ls, Operations.LUA_OPBOR);
         }
 
+        // BXOR
+        // A B C	R(A) := RK(B) ~ RK(C)
         internal static void BXor(Instruction i, LuaState ls)
         {
             BinaryOp(i, ls, Operations.LUA_OPBXOR);
         }
 
+        // SHL
+        // A B C	R(A) := RK(B) << RK(C)
         internal static void Shl(Instruction i, LuaState ls)
         {
             BinaryOp(i, ls, Operations.LUA_OPSHL);
         }
 
+        // SHR
+        // A B C	R(A) := RK(B) >> RK(C)
         internal static void Shr(Instruction i, LuaState ls)
         {
             BinaryOp(i, ls, Operations.LUA_OPSHR);
         }
 
+        // UNM
+        // A B	    R(A) := -R(B)
         internal static void Unm(Instruction i, LuaState ls)
         {
             UnaryOp(i, ls, Operations.LUA_OPUNM);
         }
 
+        // BNOT
+        // A B	    R(A) := ~R(B)
         internal static void BNot(Instruction i, LuaState ls)
         {
             UnaryOp(i, ls, Operations.LUA_OPBNOT);
         }
 
-        // 长度
+        // LEN
+        // A B	    R(A) := length of R(B)
         internal static void Len(Instruction i, LuaState ls)
         {
             var t = i.ABC();
@@ -190,7 +225,8 @@ namespace LuaVM.Net.Core
             ls.Replace(a);
         }
 
-        // 连接
+        // CONCAT
+        // A B C	R(A) := R(B).. ... ..R(C)
         internal static void Concat(Instruction i, LuaState ls)
         {
             var t = i.ABC();
@@ -214,9 +250,9 @@ namespace LuaVM.Net.Core
         private static void Compare(Instruction i, LuaState ls, int op)
         {
             var abc = i.ABC();
-            var a = abc.Item1 + 1;
-            var b = abc.Item2 + 1;
-            var c = abc.Item3 + 1;
+            var a = abc.Item1;
+            var b = abc.Item2;
+            var c = abc.Item3;
 
             ls.PushRK(b);
             ls.PushRK(c);
@@ -228,40 +264,46 @@ namespace LuaVM.Net.Core
             ls.Pop(2);
         }
 
+        // EQ
+        // A B C	if ((RK(B) == RK(C)) ~= A) then pc++
         internal static void EQ(Instruction i, LuaState ls)
         {
             Compare(i, ls, Operations.LUA_OPEQ);
         }
 
+        // LT
+        // A B C	if ((RK(B) <  RK(C)) ~= A) then pc++
         internal static void LT(Instruction i, LuaState ls)
         {
             Compare(i, ls, Operations.LUA_OPLT);
         }
 
+        // LE
+        // A B C	if ((RK(B) <= RK(C)) ~= A) then pc++
         internal static void LE(Instruction i, LuaState ls)
         {
             Compare(i, ls, Operations.LUA_OPLE);
         }
 
         // NOT
+        // A B	    R(A) := not R(B)
         internal static void Not(Instruction i, LuaState ls)
         {
             var t = i.ABC();
             var a = t.Item1 + 1;
             var b = t.Item2 + 1;
-            //var c = t.Item3 + 1;
 
             ls.Push(!ls.ToBoolean(b));
             ls.Replace(a);
         }
 
         // TEST
+        // A C	    if not (R(A) <=> C) then pc++
         internal static void Test(Instruction i, LuaState ls)
         {
             var t = i.ABC();
             var a = t.Item1 + 1;
-            var b = t.Item2 + 1;
-            var c = t.Item3 + 1;
+            var c = t.Item3;
 
             if (ls.ToBoolean(a) != (c != 0))
             {
@@ -270,12 +312,13 @@ namespace LuaVM.Net.Core
         }
 
         // TESTSET
+        // A B C	if (R(B) <=> C) then R(A) := R(B) else pc++
         internal static void TestSet(Instruction i, LuaState ls)
         {
             var t = i.ABC();
             var a = t.Item1 + 1;
             var b = t.Item2 + 1;
-            var c = t.Item3 + 1;
+            var c = t.Item3;
 
             if (ls.ToBoolean(b) == (c != 0))
             {
@@ -288,6 +331,7 @@ namespace LuaVM.Net.Core
         }
 
         // FORPREP
+        // A sBx	R(A) -= R(A+2); pc += sBx
         internal static void ForPrep(Instruction i, LuaState ls)
         {
             var t = i.AsBx();
@@ -302,6 +346,7 @@ namespace LuaVM.Net.Core
         }
 
         // FORLOOP
+        // A sBx	if R(A+1) ~= nil then { R(A) = R(A+1); pc += sBx }
         internal static void ForLoop(Instruction i, LuaState ls)
         {
             var t = i.AsBx();
@@ -324,9 +369,10 @@ namespace LuaVM.Net.Core
             }
         }
 
+        // 对暂未实现的指令，可以先执行此函数，以求编译通过编译测试已实现的指令函数
         internal static void Func(Instruction i, LuaState ls)
         {
-
+            Console.WriteLine($"Warning: instruction [{i.OpName()}] not implement");
         }
     }
 }

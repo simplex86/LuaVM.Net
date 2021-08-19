@@ -13,6 +13,7 @@ namespace LuaVM.Net.Core
         internal byte argBMode;
         internal byte argCMode;
         internal byte opMode;
+        // TODO 以上5个byte可以优化成1个byte
         internal string name;
         internal Invoke invoke;
 
