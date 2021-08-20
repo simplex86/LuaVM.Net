@@ -79,7 +79,7 @@ namespace LuaVM.Net.Core
                     var len = arr.Count;
                     if (i <= len)
                     {
-                        arr[i] = val;
+                        arr[i-1] = val;
                         if (i == len && val.IsNil())
                         {
                             ShrinkArray();

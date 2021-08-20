@@ -10,20 +10,10 @@ namespace LuaVM.Net
         // 加载lua字节码文件
         public void Do(string filename)
         {
-            var rootpath = GetProjectPath();
-            filename = Path.Combine(rootpath, filename);
-
             Console.WriteLine("undump test:");
-            var bytes = File.ReadAllBytes(filename);
-            var proto = Chunk.Undump(bytes);
+            var proto = Test.LoadLuac(filename);
             PrintProto(proto);
             Console.WriteLine("undump test done!");
-        }
-
-        // 获取工程路径
-        private string GetProjectPath()
-        {
-            return Directory.GetParent(Environment.CurrentDirectory).Parent.Parent.FullName;
         }
 
         private void PrintProto(Prototype proto)

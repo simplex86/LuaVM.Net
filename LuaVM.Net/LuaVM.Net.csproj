@@ -79,6 +79,7 @@
     <Compile Include="Core\VM\Api\Internals\Arithmetic.cs" />
     <Compile Include="Core\VM\Api\Internals\Compare.cs" />
     <Compile Include="Core\VM\Api\Internals\Number.cs" />
+    <Compile Include="Core\VM\Api\Internals\Table.cs" />
     <Compile Include="Core\VM\Api\LuaStack.cs" />
     <Compile Include="Core\VM\Api\LuaState.cs" />
     <Compile Include="Core\VM\Api\LuaTable.cs" />
@@ -94,6 +95,7 @@
     <Compile Include="Core\VM\Utils\Hash.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Test\Test.cs" />
     <Compile Include="Test\TestLexer.cs" />
     <Compile Include="Test\TestOperations.cs" />
     <Compile Include="Test\TestParser.cs" />

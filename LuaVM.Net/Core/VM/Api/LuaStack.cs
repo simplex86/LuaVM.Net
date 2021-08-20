@@ -61,6 +61,11 @@ namespace LuaVM.Net.Core
             Push(new LuaValue(value));
         }
 
+        internal void Push(LuaTable value)
+        {
+            Push(new LuaValue(value));
+        }
+
         internal void Push(LuaValue value)
         {
             if (top == capacity)
@@ -137,6 +142,19 @@ namespace LuaVM.Net.Core
             }
 
             return null;
+        }
+
+        internal void SetTable(int idx, LuaValue k, LuaValue v)
+        {
+            var s = Get(idx);
+            if (s.IsTable())
+            {
+                var t = s.GetTable();
+                t.Set(k, v);
+                return;
+            }
+
+            Error.Commit("not a table!");
         }
 
         // 判断索引是否有效

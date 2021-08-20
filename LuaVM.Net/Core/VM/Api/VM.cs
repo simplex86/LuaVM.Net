@@ -5,6 +5,7 @@ namespace LuaVM.Net.Core
 {
     internal static class VM
     {
+        // 在寄存器间拷贝值
         // MOVE
         // A B      R(A) := R(B)
         internal static void Move(Instruction i, LuaState ls)
@@ -15,6 +16,7 @@ namespace LuaVM.Net.Core
             ls.Copy(a, b);
         }
 
+        // 无条件跳转
         // JMP
         // sBx      pc += sBx
         internal static void Jump(Instruction i, LuaState ls)
@@ -30,6 +32,7 @@ namespace LuaVM.Net.Core
             }
         }
 
+        // 加载nil给寄存器
         // LOADNIL
         // A B      R(A), R(A+1), ..., R(A+B) := nil
         internal static void LoadNil(Instruction i, LuaState ls)
@@ -47,6 +50,7 @@ namespace LuaVM.Net.Core
             ls.Pop(1);
         }
 
+        // 设置布尔值B给R(A)，如果C为true则跳过下一条指令
         // LOADBOOL
         // A B C    R(A) := (Bool)B; if(C) pc++
         internal static void LoadBoolean(Instruction i, LuaState ls)
@@ -64,6 +68,7 @@ namespace LuaVM.Net.Core
             }
         }
 
+        // 加载常量给寄存器
         // LOADK
         // A Bx     R(A) := Kst(Bx)
         internal static void LoadK(Instruction i, LuaState ls)
@@ -76,6 +81,7 @@ namespace LuaVM.Net.Core
             ls.Replace(a);
         }
 
+        // 加载常量到寄存器，常量索引从下一条指令OP_EXTRAARG获取，也就是下一行指令必定是OP_EXTRAARG
         // LOADKX
         // A        R(A) := Kst(extra arg)
         internal static void LoadKx(Instruction i, LuaState ls)
@@ -369,10 +375,113 @@ namespace LuaVM.Net.Core
             }
         }
 
+        // 新建一个表，表的数组和哈希初始大小分别是B，C
+        // NEWTABLE
+        // A B C    R(A) := {} (size = B,C)
+        internal static void NewTable(Instruction i, LuaState ls)
+        {
+            var abc = i.ABC();
+            var a = abc.Item1 + 1;
+            var b = abc.Item2;
+            var c = abc.Item3;
+            
+            ls.CreateTable(Fb2Int(b), Fb2Int(c));
+            ls.Replace(a);
+        }
+
+        // 从第B个寄存器取出表，然后以RK(C)为Key取表的值给寄存器
+        // GETTABLE
+        // A B C    R(A) := R(B)[RK(C)]
+        internal static void GetTable(Instruction i, LuaState ls)
+        {
+            var t = i.ABC();
+            var a = t.Item1 + 1;
+            var b = t.Item2 + 1;
+            var c = t.Item3;
+
+            ls.PushRK(c);
+            ls.GetTable(b);
+            ls.Replace(a);
+        }
+
+        // 
+        // SETTABLE
+        // A B C    R(A)[RK(B)] := RK(C)
+        internal static void SetTable(Instruction i, LuaState ls)
+        {
+            var t = i.ABC();
+            var a = t.Item1 + 1;
+            var b = t.Item2;
+            var c = t.Item3;
+
+            ls.PushRK(b);
+            ls.PushRK(c);
+            ls.SetTable(a);
+        }
+
+        private const int LFIELDS_PER_FLUSH = 50;
+
+        // 批量设置数组元素
+        // A B C    R(A)[(C-1)*FPF+i] := R(A+i), 1 <= i <= B
+        internal static void SetList(Instruction i, LuaState ls)
+        {
+            var t = i.ABC();
+            var a = t.Item1 + 1;
+            var b = t.Item2;
+            var c = t.Item3;
+
+            c = (c > 0) ? c - 1 : new Instruction(ls.Fetch()).Ax();
+
+            var idx = (long)c * LFIELDS_PER_FLUSH;
+            for (var k = 1; k <= b; k++)
+            {
+                idx++;
+                ls.PushX(a + k);
+                ls.SetI(a, idx);
+            }
+        }
+
         // 对暂未实现的指令，可以先执行此函数，以求编译通过编译测试已实现的指令函数
         internal static void Func(Instruction i, LuaState ls)
         {
             Console.WriteLine($"Warning: instruction [{i.OpName()}] not implement");
+        }
+
+        // 
+        private static int Int2Fb(int x)
+        {
+            if (x < 8)
+            {
+                return x;
+            }
+
+            var e = 0;
+            for (; x >= (8 << 4);)
+            {
+                x = (x + 0xf) >> 4;
+                e += 4;
+            }
+
+            for (; x >= (8 << 1);)
+            {
+                x = (x + 1) >> 1;
+                e++;
+            }
+
+            return ((e + 1) << 3) | (x - 8);
+        }
+
+        // 
+        private static int Fb2Int(int x)
+        {
+            if (x < 8)
+            {
+                return x;
+            }
+            else
+            {
+                return ((x & 7 + 8)) << ((x >> 3) - 1);
+            }
         }
     }
 }

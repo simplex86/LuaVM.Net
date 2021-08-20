@@ -42,6 +42,11 @@ namespace LuaVM.Net.Core
         {
             o = s;
         }
+
+        public void Set(LuaTable t)
+        {
+            o = t;
+        }
     }
 
     // 数据（值 + 类型）
@@ -130,6 +135,11 @@ namespace LuaVM.Net.Core
             Set(s);
         }
 
+        public LuaValue(LuaTable t)
+        {
+            Set(t);
+        }
+
         // 获取数据类型
         public int type
         {
@@ -180,6 +190,17 @@ namespace LuaVM.Net.Core
             value.t = LuaType.LUA_TSTRING;
         }
 
+        // 设值
+        public void Set(LuaTable t)
+        {
+            if (value == null)
+            {
+                value = new TValue();
+            }
+            value.v.Set(t);
+            value.t = LuaType.LUA_TTABLE;
+        }
+
         public bool GetBoolean()
         {
             return u.b;
@@ -200,36 +221,26 @@ namespace LuaVM.Net.Core
             return o as string;
         }
 
+        public LuaTable GetTable()
+        {
+            return o as LuaTable;
+        }
+
         // 是否为nil
         public bool IsNil()
         {
-            if (value == null)
-            {
-                return true;
-            }
-
             return type == LuaType.LUA_TNIL;
         }
 
         // 是否为布尔类型
         public bool IsBoolean()
         {
-            if (value == null)
-            {
-                return false;
-            }
-
             return type == LuaType.LUA_TBOOLEAN;
         }
 
         // 是否为数字（整数或小数）
         public bool IsNumber()
         {
-            if (value == null)
-            {
-                return false;
-            }
-
             return type == LuaType.LUA_TNUMBER;
         }
 
@@ -258,12 +269,13 @@ namespace LuaVM.Net.Core
         // 是否为字符串
         public bool IsString()
         {
-            if (value == null)
-            {
-                return false;
-            }
-
             return type == LuaType.LUA_TSTRING;
+        }
+
+        // 是否为table
+        public bool IsTable()
+        {
+            return type == LuaType.LUA_TTABLE;
         }
 
         public static Tuple<long, bool> ToInteger(LuaValue value)

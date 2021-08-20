@@ -4,7 +4,7 @@ namespace LuaVM.Net.Core
 {
     internal static class String
     {
-        internal static int Len(LuaValue value)
+        internal static long Len(LuaValue value)
         {
             var s = value.GetString();
             return s.Length;

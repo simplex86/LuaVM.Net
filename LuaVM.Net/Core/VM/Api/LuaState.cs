@@ -227,6 +227,7 @@ namespace LuaVM.Net.Core
             return value.IsInteger();
         }
 
+        // 把指定位置转换成布尔值(nil和false,其他为true)
         public bool ToBoolean(int idx)
         {
             var value = stack.Get(idx);
@@ -247,6 +248,7 @@ namespace LuaVM.Net.Core
             return true;
         }
 
+        // 把指定位置转换成小数(包括整数和可以转换的字符串)
         public double ToNumber(int idx)
         {
             var value = stack.Get(idx);
@@ -277,6 +279,7 @@ namespace LuaVM.Net.Core
             return 0.0;
         }
 
+        // 把指定位置转换成整数(包括小数和可以转换的字符串)
         public long ToInteger(int idx)
         {
             var value = stack.Get(idx);
@@ -307,6 +310,7 @@ namespace LuaVM.Net.Core
             return 0;
         }
 
+        // 把指定位置转换成字符串(包括整数和小数)
         public string ToString(int idx)
         {
             var value = stack.Get(idx);
@@ -341,6 +345,7 @@ namespace LuaVM.Net.Core
             return Core.Compare.Do(a, b, op);
         }
 
+        // 计算
         public void Arithmetic(int op)
         {
             var b = stack.Pop();
@@ -369,9 +374,14 @@ namespace LuaVM.Net.Core
                 var n = String.Len(v);
                 stack.Push(n);
             }
+            else if (v.IsTable())
+            {
+                var n = Table.Len(v);
+                stack.Push(n);
+            }
             else
             {
-                Error.Commit("string length error!");
+                Error.Commit("length error!");
             }
         }
 
@@ -449,6 +459,95 @@ namespace LuaVM.Net.Core
             {
                 PushX(rk + 1);
             }
+        }
+
+        // 
+        public void CreateTable()
+        {
+            CreateTable(0, 0);
+        }
+
+        // 
+        public void CreateTable(int n, int m)
+        {
+            var t = new LuaTable(n, m);
+            stack.Push(t);
+        }
+
+        // 
+        public int GetTable(int idx)
+        {
+            var t = stack.Get(idx);
+            var k = stack.Pop();
+            return GetTable(t, k);
+        }
+
+        //
+        public void SetTable(int idx)
+        {
+            var t = stack.Get(idx);
+            var v = stack.Pop();
+            var k = stack.Pop();
+            SetTable(t, k, v);
+        }
+
+        // 
+        public int GetI(int idx, long i)
+        {
+            var t = stack.Get(idx);
+            var k = new LuaValue(i);
+            return GetTable(t, k);
+        }
+
+        // 
+        public void SetI(int idx, long n)
+        {
+            var t = stack.Get(idx);
+            var k = new LuaValue(n);
+            var v = stack.Pop();
+            SetTable(t, k, v);
+        }
+
+        // 
+        public int GetField(int idx, string s)
+        {
+            var t = stack.Get(idx);
+            var k = new LuaValue(s);
+            return GetTable(t, k);
+        }
+
+        // 
+        public void SetField(int idx, string s)
+        {
+            var t = stack.Get(idx);
+            var k = new LuaValue(s);
+            var v = stack.Pop();
+            SetTable(t, k, v);
+        }
+
+        private int GetTable(LuaValue t, LuaValue k)
+        {
+            if (!t.IsTable())
+            {
+                Error.Commit("not a table!");
+                return LuaType.LUA_TNONE;
+            }
+
+            var v = t.GetTable().Get(k);
+            stack.Push(v);
+
+            return v.type;
+        }
+
+        private void SetTable(LuaValue t, LuaValue k, LuaValue v)
+        {
+            if (t.IsTable())
+            {
+                t.GetTable().Set(k, v);
+                return;
+            }
+
+            Error.Commit("not a table!");
         }
     }
 }

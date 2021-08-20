@@ -58,7 +58,7 @@ namespace LuaVM.Net
         static void TestTable()
         {
             var test = new TestTable();
-            test.Do();
+            test.Do(@"Luas\table.out");
         }
     }
 }
