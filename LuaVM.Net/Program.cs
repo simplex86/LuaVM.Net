@@ -8,7 +8,7 @@ namespace LuaVM.Net
     {
         static void Main(string[] args)
         {
-            TestTable();
+            TestFunction();
             // pause
             Console.Write("\npress any key to be continue...");
             Console.ReadKey();
@@ -59,6 +59,12 @@ namespace LuaVM.Net
         {
             var test = new TestTable();
             test.Do(@"Luas\table.out");
+        }
+
+        static void TestFunction()
+        {
+            var test = new TestFunction();
+            test.Do(@"Luas\function.out");
         }
     }
 }

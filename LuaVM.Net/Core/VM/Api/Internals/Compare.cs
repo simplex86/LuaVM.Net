@@ -19,9 +19,13 @@ namespace LuaVM.Net.Core
         // 相等
         private static bool _eq(LuaValue a, LuaValue b)
         {
-            if (a == null && b == null)
+            if (LuaValue.GetType(a) == LuaType.LUA_TNIL)
             {
-                return true;
+                return LuaValue.GetType(b) == LuaType.LUA_TNIL;
+            }
+            if (LuaValue.GetType(b) == LuaType.LUA_TNIL)
+            {
+                return false;
             }
 
             if (b.IsBoolean() && b.IsBoolean())

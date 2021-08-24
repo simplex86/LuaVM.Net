@@ -47,6 +47,11 @@ namespace LuaVM.Net.Core
         {
             o = t;
         }
+
+        public void Set(Closure c)
+        {
+            o = c;
+        }
     }
 
     // 数据（值 + 类型）
@@ -76,12 +81,7 @@ namespace LuaVM.Net.Core
         // 获取类型
         internal static int GetType(LuaValue value)
         {
-            if (value == null)
-            {
-                return LuaType.LUA_TNIL;
-            }
-
-            return value.type;
+            return (value == null) ? LuaType.LUA_TNIL : value.type;
         }
 
         internal static int GetHash(LuaValue value)
@@ -138,6 +138,11 @@ namespace LuaVM.Net.Core
         public LuaValue(LuaTable t)
         {
             Set(t);
+        }
+
+        public LuaValue(Closure c)
+        {
+            Set(c);
         }
 
         // 获取数据类型
@@ -201,6 +206,17 @@ namespace LuaVM.Net.Core
             value.t = LuaType.LUA_TTABLE;
         }
 
+        // 设值
+        public void Set(Closure c)
+        {
+            if (value == null)
+            {
+                value = new TValue();
+            }
+            value.v.Set(c);
+            value.t = LuaType.LUA_TFUNCTION;
+        }
+
         public bool GetBoolean()
         {
             return u.b;
@@ -224,6 +240,11 @@ namespace LuaVM.Net.Core
         public LuaTable GetTable()
         {
             return o as LuaTable;
+        }
+
+        public Closure GetFunction()
+        {
+            return o as Closure;
         }
 
         // 是否为nil
@@ -276,6 +297,12 @@ namespace LuaVM.Net.Core
         public bool IsTable()
         {
             return type == LuaType.LUA_TTABLE;
+        }
+
+        // 是否为函数
+        public bool IsFunction()
+        {
+            return type == LuaType.LUA_TFUNCTION;
         }
 
         public static Tuple<long, bool> ToInteger(LuaValue value)

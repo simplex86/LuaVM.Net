@@ -76,6 +76,7 @@
     <Compile Include="Core\Parser\Internals\StatementParsers\RepeatStatementParser.cs" />
     <Compile Include="Core\Parser\Internals\StatementParsers\WhileStatementParser.cs" />
     <Compile Include="Core\Parser\Parser.cs" />
+    <Compile Include="Core\VM\Api\Closure.cs" />
     <Compile Include="Core\VM\Api\Internals\Arithmetic.cs" />
     <Compile Include="Core\VM\Api\Internals\Compare.cs" />
     <Compile Include="Core\VM\Api\Internals\Number.cs" />
@@ -96,6 +97,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Test\Test.cs" />
+    <Compile Include="Test\TestFunction.cs" />
     <Compile Include="Test\TestLexer.cs" />
     <Compile Include="Test\TestOperations.cs" />
     <Compile Include="Test\TestParser.cs" />

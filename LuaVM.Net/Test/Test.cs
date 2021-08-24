@@ -24,24 +24,9 @@ namespace LuaVM.Net
 
         public static void RunLuac(Prototype proto)
         {
-            var ls = new LuaState(proto.maxStackSize + 8, proto);
-            ls.SetTop(proto.maxStackSize);
-
-            while (true)
-            {
-                var pc = ls.pc;
-                var inst = new Instruction(ls.Fetch());
-                var code = inst.OpCode();
-
-                if (code == OperationCodes.OP_RETURN)
-                {
-                    break;
-                }
-
-                inst.Execute(ls);
-                Console.Write("[{0:D2}] {1}\t", pc + 1, inst.OpName());
-                PrintState(ls);
-            }
+            var ls = new LuaState(16);
+            ls.Load(proto);
+            ls.Call(0, 0);
         }
 
         public static void PrintState(LuaState ls)

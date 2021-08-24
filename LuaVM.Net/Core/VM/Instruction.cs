@@ -89,7 +89,10 @@ namespace LuaVM.Net.Core
 
             if (invoke != null)
             {
+                System.Console.Write($"[{OpName()}]");
                 invoke(this, state);
+                //state.PrintStack("\nstack: ");
+                System.Console.WriteLine("");
             }
             else
             {

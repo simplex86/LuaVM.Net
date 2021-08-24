@@ -3,9 +3,31 @@ using System.Collections.Generic;
 
 namespace LuaVM.Net.Core
 {
-    internal struct LuaStack
+    internal class LuaStack
     {
         private List<LuaValue> slots;
+
+        // 栈的容量
+        private int capacity
+        {
+            get { return slots.Capacity; }
+            set { slots.Capacity = value; }
+        }
+
+        // 栈顶索引值
+        internal int top { get; set; } = 0;
+
+        // 上一个调用栈
+        internal LuaStack prev { get; set; }
+
+        // 闭包
+        internal Closure closure { get; set; }
+
+        // 可变参数
+        internal LuaValue[] varargs { get; set; }
+
+        // 程序计数
+        internal int pc { get; set; } = 0;
 
         internal LuaStack(int n)
         {
@@ -14,7 +36,6 @@ namespace LuaVM.Net.Core
             {
                 slots.Add(null);
             }
-            top = 0;
         }
 
         // 检查栈是否可容纳n个数据，如果容纳不了则扩容
@@ -61,11 +82,19 @@ namespace LuaVM.Net.Core
             Push(new LuaValue(value));
         }
 
+        // 压栈
+        internal void Push(Closure value)
+        {
+            Push(new LuaValue(value));
+        }
+
+        // 压栈
         internal void Push(LuaTable value)
         {
             Push(new LuaValue(value));
         }
 
+        // 压栈
         internal void Push(LuaValue value)
         {
             if (top == capacity)
@@ -144,6 +173,7 @@ namespace LuaVM.Net.Core
             return null;
         }
 
+        // 设置指定索引位置的table中以k为键的值
         internal void SetTable(int idx, LuaValue k, LuaValue v)
         {
             var s = Get(idx);
@@ -181,14 +211,77 @@ namespace LuaVM.Net.Core
             return (idx > 0) ? idx : idx + top + 1;
         }
 
-        // 栈顶索引值
-        internal int top { get; private set; }
-
-        // 栈的容量
-        private int capacity
+        internal void PushN(LuaValue[] vals, int n)
         {
-            get { return slots.Capacity; }
-            set { slots.Capacity = value; }
+            var len = vals.Length;
+            if (n < 0)
+            {
+                n = len;
+            }
+
+            for (var i = 0; i < n; i++)
+            {
+                if (i < len)
+                {
+                    Push(vals[i]);
+                }
+                else
+                {
+                    Push();
+                }
+            }
+        }
+
+        internal LuaValue[] PopN(int n)
+        {
+            var vals = new LuaValue[n];
+            for (var i = n - 1; i >= 0; i--)
+            {
+                vals[i] = Pop();
+            }
+
+            return vals;
+        }
+
+        internal void Print(string prefix)
+        {
+            System.Console.Write($"{prefix}: ");
+            foreach (var v in slots)
+            {
+                if (v == null)
+                {
+                    System.Console.Write("[nil]");
+                }
+                else if (v.IsNil())
+                {
+                    System.Console.Write("[nil]");
+                }
+                else if (v.IsBoolean())
+                {
+                    System.Console.Write($"[{v.GetBoolean()}]");
+                }
+                else if (v.IsInteger())
+                {
+                    System.Console.Write($"[{v.GetInteger()}]");
+                }
+                else if (v.IsFloat())
+                {
+                    System.Console.Write($"[{v.GetFloat()}]");
+                }
+                else if (v.IsString())
+                {
+                    System.Console.Write($"[{v.GetString()}]");
+                }
+                else if (v.IsFunction())
+                {
+                    System.Console.Write("[function]");
+                }
+                else if (v.IsTable())
+                {
+                    System.Console.Write("[table]");
+                }
+            }
+            System.Console.WriteLine("");
         }
     }
 }

@@ -1,18 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace LuaVM.Net.Core
 {
     public class LuaState
     {
-        private LuaStack  stack;
-        private Prototype proto;
+        private LuaStack stack;
 
-        public int pc { get; private set; } = 0;
+        private Prototype proto
+        {
+            get { return stack.closure.proto; }
+        }
+
+        // 获取程序计数
+        public int pc 
+        {
+            get { return stack.pc; } 
+            private set { stack.pc = value; }
+        }
 
         public LuaState()
+            : this(32)
         {
-            this.stack = new LuaStack(32);
+            
         }
 
         public LuaState(int size)
@@ -20,10 +31,94 @@ namespace LuaVM.Net.Core
             this.stack = new LuaStack(size);
         }
 
-        public LuaState(int size, Prototype proto)
+        // 加载prototype
+        public int Load(Prototype proto)
         {
-            this.stack = new LuaStack(size);
-            this.proto = proto;
+            var c = new Closure(proto);
+            stack.Push(c);
+            return 0;
+        }
+
+        // 调用函数
+        public void Call(int args, int results)
+        {
+            var v = stack.Get(-(args + 1));
+            if (!v.IsFunction())
+            {
+                Error.Commit("\ntry to call a non-function type!");
+                return;
+            }
+
+            var c = v.GetFunction();
+            Console.WriteLine("\ncall {0}<{1},{2}>", c.proto.source, c.proto.lineDefined, c.proto.lastLineDefined);
+            CallClosure(args, results, c);
+        }
+
+        private void CallClosure(int args, int results, Closure c)
+        {
+            var nRegs = (int)c.proto.maxStackSize;
+            var nParams = (int)c.proto.numParams;
+            var isVararg = c.proto.isVararg == 1;
+
+            // 创建新的栈
+            var newStack = new LuaStack(nRegs + 20);
+            newStack.closure = c;
+
+            // 弹出函数，并把参数压如新的栈
+            var funcAndArgs = stack.PopN(args + 1);
+            newStack.PushN(funcAndArgs.Skip(1).ToArray(), nParams);
+            newStack.top = nRegs;
+            if (args > nParams && isVararg)
+            {
+                newStack.varargs = funcAndArgs.Skip(nParams + 1).ToArray();
+            }
+
+            // 执行闭包
+            PushStack(newStack); 
+            RunClosure(); 
+            PopStack(); 
+
+            // 返回值
+            if (results != 0)
+            {
+                var rs = newStack.PopN(newStack.top - nRegs);
+                stack.Check(rs.Length);
+                stack.PushN(rs, results);
+            }
+        }
+
+        // 执行闭包
+        private void RunClosure()
+        {
+            while (true)
+            {
+                var inst = new Instruction(Fetch());
+                inst.Execute(this);
+
+                if (inst.OpCode() == OperationCodes.OP_RETURN)
+                {
+                    break;
+                }
+            }
+        }
+
+        // 从指定位置加载prototype
+        public void LoadProto(int idx)
+        {
+            var proto = this.proto.protos[idx];
+            Load(proto);
+        }
+
+        // 加载可变参数
+        public void LoadVararg(int n)
+        {
+            if (n < 0)
+            {
+                n = stack.varargs.Length;
+            }
+
+            stack.Check(n);
+            stack.PushN(stack.varargs, n);
         }
 
         // 获取栈顶索引值
@@ -57,6 +152,12 @@ namespace LuaVM.Net.Core
                     stack.Push();
                 }
             }
+        }
+
+        // 获取寄存器数量
+        public int RegisterCount()
+        {
+            return proto.maxStackSize;
         }
 
         // 转换为绝对索引
@@ -108,7 +209,7 @@ namespace LuaVM.Net.Core
         }
 
         // 把指定位置的压入栈顶
-        public void PushX(int idx)
+        public void PushV(int idx)
         {
             var v = stack.Get(idx);
             stack.Push(v);
@@ -236,11 +337,11 @@ namespace LuaVM.Net.Core
 
         private bool ToBoolean(LuaValue value)
         {
-            if (value.type == LuaType.LUA_TNIL)
+            if (value.IsNil())
             {
                 return false;
             }
-            if (value.type == LuaType.LUA_TBOOLEAN)
+            if (value.IsBoolean())
             {
                 return value.GetBoolean();
             }
@@ -266,7 +367,7 @@ namespace LuaVM.Net.Core
                 var n = value.GetInteger();
                 return (double)n;
             }
-            if (value.type == LuaType.LUA_TSTRING)
+            if (value.IsString())
             {
                 var s = value.GetString();
                 double n = 0.0;
@@ -290,14 +391,13 @@ namespace LuaVM.Net.Core
         {
             if (value.IsFloat())
             {
-                return value.GetInteger();
+                return (long)value.GetFloat();
             }
             if (value.IsInteger())
             {
-                var n = value.GetFloat();
-                return (int)n;
+                return value.GetInteger();
             }
-            if (value.type == LuaType.LUA_TSTRING)
+            if (value.IsString())
             {
                 var s = value.GetString();
                 long n = 0;
@@ -319,18 +419,18 @@ namespace LuaVM.Net.Core
 
         private string ToString(LuaValue value)
         {
-            if (value.type == LuaType.LUA_TSTRING)
+            if (value.IsString())
             {
                 return value.GetString();
             }
             if (value.IsFloat())
             {
-                var n = value.GetInteger();
+                var n = value.GetFloat();
                 return n.ToString();
             }
             if (value.IsInteger())
             {
-                var n = value.GetFloat();
+                var n = value.GetInteger();
                 return n.ToString();
             }
 
@@ -340,8 +440,13 @@ namespace LuaVM.Net.Core
         // 比较指定位置上的两个值
         public bool Compare(int idx1, int idx2, int op)
         {
+            if (!stack.IsValid(idx1) || !stack.IsValid(idx2))
+            {
+                return false;
+            }
             var a = stack.Get(idx1);
             var b = stack.Get(idx2);
+
             return Core.Compare.Do(a, b, op);
         }
 
@@ -431,9 +536,15 @@ namespace LuaVM.Net.Core
         }
 
         // 将指定位置的常量压到栈顶
-        public void PushConst(int idx)
+        public void GetConst(int idx)
         {
             var c = proto.constants[idx];
+            if (c == null)
+            {
+                stack.Push();
+                return;
+            }
+
             switch (c.GetType().Name)
             {
                 case "Int64":
@@ -449,32 +560,32 @@ namespace LuaVM.Net.Core
         }
 
         // 将指定位置的常量或栈值压到栈顶
-        public void PushRK(int rk)
+        public void GetRK(int rk)
         {
             if (rk > 0xFF)
             {
-                PushConst(rk & 0xFF);
+                GetConst(rk & 0xFF);
             }
             else
             {
-                PushX(rk + 1);
+                PushV(rk + 1);
             }
         }
 
-        // 
+        // 创建table
         public void CreateTable()
         {
             CreateTable(0, 0);
         }
 
-        // 
+        // 创建table
         public void CreateTable(int n, int m)
         {
             var t = new LuaTable(n, m);
             stack.Push(t);
         }
 
-        // 
+        // 从指定位置获取table
         public int GetTable(int idx)
         {
             var t = stack.Get(idx);
@@ -482,7 +593,7 @@ namespace LuaVM.Net.Core
             return GetTable(t, k);
         }
 
-        //
+        // 把table设置到指定位置
         public void SetTable(int idx)
         {
             var t = stack.Get(idx);
@@ -491,7 +602,7 @@ namespace LuaVM.Net.Core
             SetTable(t, k, v);
         }
 
-        // 
+        // 获取 idx 位置的table中 i 索引的值
         public int GetI(int idx, long i)
         {
             var t = stack.Get(idx);
@@ -499,7 +610,7 @@ namespace LuaVM.Net.Core
             return GetTable(t, k);
         }
 
-        // 
+        // 设置 idx 位置的table中 i 索引的值
         public void SetI(int idx, long n)
         {
             var t = stack.Get(idx);
@@ -508,7 +619,7 @@ namespace LuaVM.Net.Core
             SetTable(t, k, v);
         }
 
-        // 
+        // 获取 idx 位置的table中 k 键值的值
         public int GetField(int idx, string s)
         {
             var t = stack.Get(idx);
@@ -516,7 +627,7 @@ namespace LuaVM.Net.Core
             return GetTable(t, k);
         }
 
-        // 
+        // 设置 idx 位置的table中 k 键值的值
         public void SetField(int idx, string s)
         {
             var t = stack.Get(idx);
@@ -548,6 +659,26 @@ namespace LuaVM.Net.Core
             }
 
             Error.Commit("not a table!");
+        }
+
+        // 压入调用栈
+        internal void PushStack(LuaStack stack)
+        {
+            stack.prev = this.stack;
+            this.stack = stack;
+        }
+
+        // 弹出调用栈
+        internal void PopStack()
+        {
+            var s = stack;
+            stack = s.prev;
+            s.prev = null;
+        }
+
+        internal void PrintStack(string prefix)
+        {
+            stack.Print(prefix);
         }
     }
 }

@@ -53,13 +53,7 @@ namespace LuaVM.Net.Core
 
         public void Set(LuaValue key, LuaValue val)
         {
-            if (key == null)
-            {
-                Error.Commit("");
-                return;
-            }
-
-            if (key.IsNil())
+            if (LuaValue.GetType(key) == LuaType.LUA_TNIL)
             {
                 Error.Commit("");
                 return;
@@ -126,11 +120,20 @@ namespace LuaVM.Net.Core
         {
             for (var i = arr.Count - 1; i >= 0; i--)
             {
-                if (arr[i] == null)
+                if (LuaValue.GetType(arr[i]) == LuaType.LUA_TNIL)
                 {
-                    //Array.Copy(arr, 0, arr, 0, i);
+                    ShrinkCopy(i);
                 }
             }
+        }
+
+        private void ShrinkCopy(int idx)
+        {
+            for (var i=idx+1; i<arr.Count; i++)
+            {
+                arr[idx] = arr[i];
+            }
+            arr.RemoveAt(arr.Count - 1);
         }
 
         private void ExpandArray()
