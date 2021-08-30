@@ -3,15 +3,15 @@ using System.Collections.Generic;
 
 namespace LuaVM.Net.Core
 {
-    public class Chunk
+    internal class Chunk
     {
-        public static byte[] Dump(BinaryChunk chunk)
+        internal static byte[] Dump(BinaryChunk chunk)
         {
             return null;
         }
 
         // 反编译字节码
-        public static Prototype Undump(byte[] bytes)
+        internal static Prototype Undump(byte[] bytes)
         {
             ChunkReader reader = new ChunkReader(bytes);
             CheckHeader(reader);
@@ -19,7 +19,7 @@ namespace LuaVM.Net.Core
             return reader.ReadProto("");
         }
 
-        public static void CheckHeader(ChunkReader reader)
+        internal static void CheckHeader(ChunkReader reader)
         {
             if (Convert.Bytes2String(reader.ReadBytes(4)) != ChunkValues.LUA_SIGNATURE)
             {
@@ -79,7 +79,7 @@ namespace LuaVM.Net.Core
         }
     }
 
-    public struct BinaryChunk
+    internal struct BinaryChunk
     {
         // 头部
         Header header;
@@ -89,7 +89,7 @@ namespace LuaVM.Net.Core
         Prototype mainFunc;
     }
 
-    struct Header
+    internal struct Header
     {
         // 签名
         byte[] signature;
@@ -115,7 +115,7 @@ namespace LuaVM.Net.Core
         double luacNumber;
     }
 
-    public struct Prototype
+    public class Prototype
     {
         // 源文件名
         internal string source;
@@ -133,8 +133,8 @@ namespace LuaVM.Net.Core
         internal uint[] code;
         // 常量表
         internal object[] constants;
-        // upvalue表
-        internal Upvalue[] upvalues;
+        // upvalue描述表
+        internal UpvalueDesc[] upvalues;
         // 子函数原型表
         internal Prototype[] protos;
         // 行号表
@@ -145,7 +145,7 @@ namespace LuaVM.Net.Core
         internal string[] upvalueNames;
     }
 
-    internal struct Upvalue
+    internal struct UpvalueDesc
     {
         internal byte instack;
         internal byte idx;

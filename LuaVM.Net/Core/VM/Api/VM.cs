@@ -29,7 +29,7 @@ namespace LuaVM.Net.Core
             ls.AddPC(b);
             if (a != 0)
             {
-                Error.Commit("todo: jump");
+                ls.CloseUpvalues(a);
             }
         }
 
@@ -615,6 +615,62 @@ namespace LuaVM.Net.Core
             ls.GetRK(c);
             ls.GetTable(b);
             ls.Replace(a);
+        }
+
+        // 
+        // 
+        internal static void GetUpval(Instruction i, LuaState ls)
+        {
+            var t = i.ABC();
+            var a = t.Item1 + 1;
+            var b = t.Item2 + 1;
+            System.Console.Write($"[ABC:{a}|{b}]");
+            ls.Copy(GetUpvalueIndex(b), a);
+        }
+
+        // 
+        // 
+        internal static void SetUpval(Instruction i, LuaState ls)
+        {
+            var t = i.ABC();
+            var a = t.Item1 + 1;
+            var b = t.Item2 + 1;
+            System.Console.Write($"[ABC:{a}|{b}]");
+            ls.Copy(a, GetUpvalueIndex(b));
+        }
+
+        // 
+        // 
+        internal static void GetTabUp(Instruction i, LuaState ls)
+        {
+            var t = i.ABC();
+            var a = t.Item1 + 1;
+            var b = t.Item2 + 1;
+            var c = t.Item3;
+            System.Console.Write($"[ABC:{a}|{b}|{c}]");
+            ls.GetRK(c);
+            ls.GetTable(GetUpvalueIndex(b));
+            ls.Replace(a);
+        }
+
+        // 
+        // 
+        internal static void SetTabUp(Instruction i, LuaState ls)
+        {
+            var t = i.ABC();
+            var a = t.Item1 + 1;
+            var b = t.Item2;
+            var c = t.Item3;
+            System.Console.Write($"[ABC:{a}|{b}|{c}]");
+            ls.GetRK(b);
+            ls.GetRK(c);
+            var idx = GetUpvalueIndex(a);
+            ls.SetTable(idx);
+        }
+
+        private static int GetUpvalueIndex(int idx)
+        {
+            return StateReg.LUA_REGISTRY_INDEX - idx;
         }
 
         // 对暂未实现的指令，可以先执行此函数，以求编译通过编译测试已实现的指令函数

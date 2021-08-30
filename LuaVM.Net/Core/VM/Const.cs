@@ -50,23 +50,35 @@ namespace LuaVM.Net.Core
 
     internal static class Operations
     {
-        public const int LUA_OPADD = 0;
-        public const int LUA_OPSUB = 1;
-        public const int LUA_OPMUL = 2;
-        public const int LUA_OPMOD = 3;
-        public const int LUA_OPPOW = 4;
-        public const int LUA_OPDIV = 5;
-        public const int LUA_OPIDIV = 6;
-        public const int LUA_OPBAND = 7;
-        public const int LUA_OPBOR = 8;
-        public const int LUA_OPBXOR = 9;
-        public const int LUA_OPSHL = 10;
-        public const int LUA_OPSHR = 11;
-        public const int LUA_OPUNM = 12;
-        public const int LUA_OPBNOT = 13;
+        internal const int LUA_OPADD = 0;
+        internal const int LUA_OPSUB = 1;
+        internal const int LUA_OPMUL = 2;
+        internal const int LUA_OPMOD = 3;
+        internal const int LUA_OPPOW = 4;
+        internal const int LUA_OPDIV = 5;
+        internal const int LUA_OPIDIV = 6;
+        internal const int LUA_OPBAND = 7;
+        internal const int LUA_OPBOR = 8;
+        internal const int LUA_OPBXOR = 9;
+        internal const int LUA_OPSHL = 10;
+        internal const int LUA_OPSHR = 11;
+        internal const int LUA_OPUNM = 12;
+        internal const int LUA_OPBNOT = 13;
         // compare ops
-        public const int LUA_OPEQ = 0;
-        public const int LUA_OPLT = 1;
-        public const int LUA_OPLE = 2;
+        internal const int LUA_OPEQ = 0;
+        internal const int LUA_OPLT = 1;
+        internal const int LUA_OPLE = 2;
+    }
+
+    internal static class StackSize
+    {
+        internal const int LUA_STACK_MIN = 20;
+        internal const int LUA_STACK_MAX = 1000000;
+    }
+
+    internal static class StateReg
+    {
+        internal const int LUA_REGISTRY_INDEX = -StackSize.LUA_STACK_MAX - 1000;
+        internal static readonly LuaValue LUA_REGISTRY_GLOBALS = new LuaValue(2);
     }
 }

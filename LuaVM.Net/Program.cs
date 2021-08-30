@@ -8,7 +8,7 @@ namespace LuaVM.Net
     {
         static void Main(string[] args)
         {
-            TestFunction();
+            TestClosure();
             // pause
             Console.Write("\npress any key to be continue...");
             Console.ReadKey();
@@ -18,21 +18,21 @@ namespace LuaVM.Net
         static void TestLexer()
         {
             var test = new TestLexer();
-            test.Do(@"Luas\01.lua");
+            test.Do(@"Luas\lexer.lua");
         }
 
         // 执行语法分析器的测试
         static void TestParser()
         {
             var test = new TestParser();
-            test.Do(@"Luas\01.lua");
+            test.Do(@"Luas\lexer.lua");
         }
 
         // 执行字节反编译器的测试
         static void TestUndump()
         {
             var test = new TestUndump();
-            test.Do(@"Luas\03.out");
+            test.Do(@"Luas\vm.out");
         }
 
         // 执行Lua数据类型的测试
@@ -65,6 +65,12 @@ namespace LuaVM.Net
         {
             var test = new TestFunction();
             test.Do(@"Luas\function.out");
+        }
+
+        static void TestClosure()
+        {
+            var test = new TestClosure();
+            test.Do(@"Luas\closure.out");
         }
     }
 }

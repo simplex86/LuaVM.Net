@@ -8,7 +8,8 @@ namespace LuaVM.Net.Core
     {
         public static void Commit(string err)
         {
-            Console.WriteLine(err);
+            //Console.WriteLine(err);
+            throw new Exception(err);
         }
     }
 }

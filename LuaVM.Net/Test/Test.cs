@@ -24,7 +24,7 @@ namespace LuaVM.Net
 
         public static void RunLuac(Prototype proto)
         {
-            var ls = new LuaState(16);
+            var ls = new LuaState();
             ls.Load(proto);
             ls.Call(0, 0);
         }

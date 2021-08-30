@@ -9,25 +9,15 @@ namespace LuaVM.Net.Core
         private List<LuaValue> arr;
         private Dictionary<int, LuaValue> map;
 
+        public LuaTable()
+            : this(0, 0)
+        {
+
+        }
         public LuaTable(int n, int m)
         {
-            if (n > 0)
-            {
-                arr = new List<LuaValue>(n);
-            }
-            else
-            {
-                arr = new List<LuaValue>();
-            }
-
-            if (m > 0)
-            {
-                map = new Dictionary<int, LuaValue>(m);
-            }
-            else
-            {
-                map = new Dictionary<int, LuaValue>();
-            }
+            arr = (n > 0) ? new List<LuaValue>(n) : new List<LuaValue>();
+            map = (m > 0) ? new Dictionary<int, LuaValue>(m) : new Dictionary<int, LuaValue>();
         }
 
         public LuaValue Get(LuaValue key)
@@ -55,13 +45,13 @@ namespace LuaVM.Net.Core
         {
             if (LuaValue.GetType(key) == LuaType.LUA_TNIL)
             {
-                Error.Commit("");
+                Error.Commit("table index is nil!");
                 return;
             }
 
-            if (val.IsFloat() && double.IsNaN(val.GetFloat()))
+            if (key.IsFloat() && double.IsNaN(key.GetFloat()))
             {
-                Error.Commit("");
+                Error.Commit("table index is NaN!");
                 return;
             }
 

@@ -3,18 +3,18 @@ using System.Text;
 
 namespace LuaVM.Net.Core
 {
-    public class ChunkReader
+    internal class ChunkReader
     {
         private byte[] bytes = null;
         private int index = 0;
 
-        public ChunkReader(byte[] bytes)
+        internal ChunkReader(byte[] bytes)
         {
             this.bytes = bytes;
             this.index = 0;
         }
 
-        public byte ReadByte()
+        internal byte ReadByte()
         {
             byte b = bytes[index];
             Skip(1);
@@ -22,7 +22,7 @@ namespace LuaVM.Net.Core
             return b;
         }
 
-        public uint ReadUInt32()
+        internal uint ReadUInt32()
         {
             var b = new byte[4];
             Array.ConstrainedCopy(bytes, index, b, 0, b.Length);
@@ -36,7 +36,7 @@ namespace LuaVM.Net.Core
             return BitConverter.ToUInt32(b, 0);
         }
 
-        public ulong ReadUInt64()
+        internal ulong ReadUInt64()
         {
             var b = new byte[8];
             Array.ConstrainedCopy(bytes, index, b, 0, b.Length);
@@ -50,7 +50,7 @@ namespace LuaVM.Net.Core
             return BitConverter.ToUInt64(b, 0);
         }
 
-        public byte[] ReadBytes(uint n)
+        internal byte[] ReadBytes(uint n)
         {
             var b = new byte[n];
             Array.ConstrainedCopy(bytes, index, b, 0, (int)n);
@@ -59,17 +59,17 @@ namespace LuaVM.Net.Core
             return b;
         }
 
-        public long ReadLuaInteger()
+        internal long ReadLuaInteger()
         {
             return (long)ReadUInt64();
         }
 
-        public double ReadLuaNumber()
+        internal double ReadLuaNumber()
         {
             return BitConverter.Int64BitsToDouble((long)ReadUInt64());
         }
 
-        public Prototype ReadProto(string parentSource)
+        internal Prototype ReadProto(string parentSource)
         {
             var source = ReadString();
             if (string.IsNullOrEmpty(source))
@@ -149,12 +149,12 @@ namespace LuaVM.Net.Core
             return protos;
         }
 
-        private Upvalue[] ReadUpvalues()
+        private UpvalueDesc[] ReadUpvalues()
         {
-            var upvalues = new Upvalue[ReadUInt32()];
+            var upvalues = new UpvalueDesc[ReadUInt32()];
             for (var i = 0; i < upvalues.Length; i++)
             {
-                upvalues[i] = new Upvalue
+                upvalues[i] = new UpvalueDesc
                 {
                     instack = ReadByte(),
                     idx     = ReadByte()

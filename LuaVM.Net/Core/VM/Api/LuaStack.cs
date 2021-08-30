@@ -6,6 +6,7 @@ namespace LuaVM.Net.Core
     internal class LuaStack
     {
         private List<LuaValue> slots;
+        private LuaState state;
 
         // 栈的容量
         private int capacity
@@ -29,13 +30,17 @@ namespace LuaVM.Net.Core
         // 程序计数
         internal int pc { get; set; } = 0;
 
-        internal LuaStack(int n)
+        // 
+        internal Dictionary<int, Upvalue> openuvs { get; set; } = null;
+
+        internal LuaStack(int size, LuaState state)
         {
-            slots = new List<LuaValue>(n);
-            for (int i=0; i<n; i++)
+            slots = new List<LuaValue>(size);
+            for (int i=0; i< size; i++)
             {
                 slots.Add(null);
             }
+            this.state = state;
         }
 
         // 检查栈是否可容纳n个数据，如果容纳不了则扩容
@@ -153,17 +158,48 @@ namespace LuaVM.Net.Core
         // 设置指定索引位置的值
         internal void Set(int idx, LuaValue value)
         {
-            idx = GetAbsIndex(idx);
-            if (idx <= 0 || idx > top)
+            if (idx < StateReg.LUA_REGISTRY_INDEX)
+            {
+                idx = StateReg.LUA_REGISTRY_INDEX - idx - 1;
+                if (closure != null && idx < closure.upvalues.Length)
+                {
+                    closure.upvalues[idx].value = value;
+                    return;
+                }
+
+                state.registry = value.GetTable();
+                return;
+            }
+
+            var absIdx = GetAbsIndex(idx);
+            //Console.WriteLine($"{idx} -> {absIdx}");
+            if (absIdx <= 0 || absIdx > top)
             {
                 throw new Exception("invalid stack index!");
             }
-            slots[idx - 1] = value;
+            slots[absIdx - 1] = value;
         }
 
         // 获取指定索引位置的值
         internal LuaValue Get(int idx)
         {
+            if (idx < StateReg.LUA_REGISTRY_INDEX)
+            {
+                idx = StateReg.LUA_REGISTRY_INDEX - idx - 1;
+                var c = closure;
+                if (closure == null || idx >= closure.upvalues.Length)
+                {
+                    return null;
+                }
+
+                return c.upvalues[idx].value;
+            }
+
+            if (idx == StateReg.LUA_REGISTRY_INDEX)
+            {
+                return new LuaValue(state.registry);
+            }
+
             idx = GetAbsIndex(idx);
             if (idx > 0 && idx <= top)
             {
@@ -171,6 +207,12 @@ namespace LuaVM.Net.Core
             }
 
             return null;
+        }
+
+        // 获取指定索引位置的值（不转换索引值）
+        internal LuaValue Peek(int idx)
+        {
+            return slots[idx];
         }
 
         // 设置指定索引位置的table中以k为键的值
@@ -184,12 +226,18 @@ namespace LuaVM.Net.Core
                 return;
             }
 
-            Error.Commit("not a table!");
+            Error.Commit($"LuaStack SetTable: not a table! idx = {idx}");
         }
 
         // 判断索引是否有效
         internal bool IsValid(int idx)
         {
+            if (idx < StateReg.LUA_REGISTRY_INDEX)
+            {
+                idx = StateReg.LUA_REGISTRY_INDEX - idx - 1;
+                return closure != null && idx < closure.upvalues.Length;
+            }
+
             idx = GetAbsIndex(idx);
             return idx > 0 && idx <= top;
         }
@@ -208,6 +256,10 @@ namespace LuaVM.Net.Core
         // 获取（正数）索引值
         internal int GetAbsIndex(int idx)
         {
+            if (idx >= 0 || idx < StateReg.LUA_REGISTRY_INDEX)
+            {
+                return idx;
+            }
             return (idx > 0) ? idx : idx + top + 1;
         }
 
