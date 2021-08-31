@@ -86,6 +86,7 @@
     <Compile Include="Core\VM\Api\LuaTable.cs" />
     <Compile Include="Core\VM\Api\LuaValue.cs" />
     <Compile Include="Core\VM\Api\Internals\String.cs" />
+    <Compile Include="Core\VM\Api\Method.cs" />
     <Compile Include="Core\VM\Api\VM.cs" />
     <Compile Include="Core\VM\Chunk\Chunk.cs" />
     <Compile Include="Core\VM\Chunk\ChunkReader.cs" />

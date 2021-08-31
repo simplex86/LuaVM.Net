@@ -333,7 +333,7 @@ namespace LuaVM.Net.Core
                     System.Console.Write("[table]");
                 }
             }
-            System.Console.WriteLine("");
+            System.Console.WriteLine();
         }
     }
 }

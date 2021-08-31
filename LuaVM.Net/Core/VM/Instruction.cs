@@ -1,5 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿//#define _SHOW_INSTRUCTION_INFO_
+using System;
 
 namespace LuaVM.Net.Core
 {
@@ -89,10 +89,14 @@ namespace LuaVM.Net.Core
 
             if (invoke != null)
             {
+#if _SHOW_INSTRUCTION_INFO_
                 System.Console.Write($"[{OpName()}]");
+#endif
                 invoke(this, state);
+#if _SHOW_INSTRUCTION_INFO_
                 state.PrintStack("\nstack: ");
-                System.Console.WriteLine("");
+                System.Console.WriteLine();
+#endif
             }
             else
             {

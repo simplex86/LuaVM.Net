@@ -132,7 +132,7 @@ namespace LuaVM.Net.Core
         // 指令表
         internal uint[] code;
         // 常量表
-        internal object[] constants;
+        internal LuaValue[] constants;
         // upvalue描述表
         internal UpvalueDesc[] upvalues;
         // 子函数原型表

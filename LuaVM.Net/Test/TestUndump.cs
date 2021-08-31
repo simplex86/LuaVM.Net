@@ -141,20 +141,23 @@ namespace LuaVM.Net
             return proto.upvalueNames.Length > 0 ? proto.upvalueNames[idx] : "-";
         }
 
-        private object ConstantToString(object k)
+        private string ConstantToString(LuaValue k)
         {
-            if (k == null)
+            if (LuaValue.GetType(k) == LuaType.LUA_TNIL)
             {
                 return "nil";
             }
 
-            switch (k.GetType().Name)
+            switch (k.type)
             {
-                case "Boolean": return (bool)k;
-                case "Double": return (double)k;
-                case "Long": return (long)k;
-                case "String": return (string)k;
-                default: return "?";
+                case LuaType.LUA_TBOOLEAN: 
+                    return k.GetBoolean().ToString();
+                case LuaType.LUA_TNUMBER:
+                    return k.IsFloat() ? k.GetFloat().ToString() : k.GetInteger().ToString();
+                case LuaType.LUA_TSTRING: 
+                    return k.GetString();
+                default: 
+                    return "?";
             }
         }
     }

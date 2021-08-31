@@ -1,5 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿//#define _SHOW_INSTRUCTION_INFO_
+
+using System;
 
 namespace LuaVM.Net.Core
 {
@@ -13,7 +14,9 @@ namespace LuaVM.Net.Core
             var t = i.ABC();
             var a = t.Item1 + 1;
             var b = t.Item2 + 1;
+#if _SHOW_INSTRUCTION_INFO_
             System.Console.Write($"[ABC:{a}|{b}]");
+#endif
             ls.Copy(b, a);
         }
 
@@ -25,7 +28,9 @@ namespace LuaVM.Net.Core
             var t = i.AsBx();
             var a = t.Item1;
             var b = t.Item2;
+#if _SHOW_INSTRUCTION_INFO_
             System.Console.Write($"[AsBx:{a}|{b}]");
+#endif
             ls.AddPC(b);
             if (a != 0)
             {
@@ -41,7 +46,9 @@ namespace LuaVM.Net.Core
             var t = i.AsBx();
             var a = t.Item1 + 1;
             var b = t.Item2;
+#if _SHOW_INSTRUCTION_INFO_
             System.Console.Write($"[AsBx:{a}|{b}]");
+#endif
             ls.Push();
 
             for (int k = a; k<= a+b; k++)
@@ -60,7 +67,9 @@ namespace LuaVM.Net.Core
             var a = t.Item1 + 1;
             var b = t.Item2;
             var c = t.Item3;
+#if _SHOW_INSTRUCTION_INFO_
             System.Console.Write($"[ABC:{a}|{b}|{c}]");
+#endif
             ls.Push(b != 0);
             ls.Replace(a);
             if (c != 0)
@@ -77,7 +86,9 @@ namespace LuaVM.Net.Core
             var t = i.ABx();
             var a = t.Item1 + 1;
             var b = t.Item2;
+#if _SHOW_INSTRUCTION_INFO_
             System.Console.Write($"[ABx:{a}|{b}]");
+#endif
             ls.GetConst(b);
             ls.Replace(a);
         }
@@ -91,7 +102,9 @@ namespace LuaVM.Net.Core
             var a = t.Item1 + 1;
             var p = new Instruction(ls.Fetch());
             var b = p.Ax();
+#if _SHOW_INSTRUCTION_INFO_
             System.Console.Write($"[ABx:{a}|{b}]");
+#endif
             ls.GetConst(b);
             ls.Replace(a);
         }
@@ -102,7 +115,9 @@ namespace LuaVM.Net.Core
             var t = i.ABC();
             var a = t.Item1 + 1;
             var b = t.Item2 + 1;
+#if _SHOW_INSTRUCTION_INFO_
             System.Console.Write($"[ABC:{a}|{b}]");
+#endif
             ls.PushV(b);
             ls.Arithmetic(op);
             ls.Replace(a);
@@ -115,7 +130,9 @@ namespace LuaVM.Net.Core
             var a = t.Item1 + 1;
             var b = t.Item2;
             var c = t.Item3;
+#if _SHOW_INSTRUCTION_INFO_
             System.Console.Write($"[ABC:{a}|{b}|{c}]");
+#endif
             ls.GetRK(b);
             ls.GetRK(c);
             ls.Arithmetic(op);
@@ -227,7 +244,9 @@ namespace LuaVM.Net.Core
             var t = i.ABC();
             var a = t.Item1 + 1;
             var b = t.Item2 + 1;
+#if _SHOW_INSTRUCTION_INFO_
             System.Console.Write($"[ABC:{a}|{b}]");
+#endif
             ls.Len(b);
             ls.Replace(a);
         }
@@ -240,7 +259,9 @@ namespace LuaVM.Net.Core
             var a = t.Item1 + 1;
             var b = t.Item2 + 1;
             var c = t.Item3 + 1;
+#if _SHOW_INSTRUCTION_INFO_
             System.Console.Write($"[ABC:{a}|{b}|{c}]");
+#endif
             var n = c - b + 1;
             ls.Check(n);
 
@@ -260,7 +281,9 @@ namespace LuaVM.Net.Core
             var a = t.Item1;
             var b = t.Item2;
             var c = t.Item3;
+#if _SHOW_INSTRUCTION_INFO_
             System.Console.Write($"[ABC:{a}|{b}|{c}]");
+#endif
             ls.GetRK(b);
             ls.GetRK(c);
             if (ls.Compare(-2, -1, op) != (a != 0))
@@ -299,7 +322,9 @@ namespace LuaVM.Net.Core
             var t = i.ABC();
             var a = t.Item1 + 1;
             var b = t.Item2 + 1;
+#if _SHOW_INSTRUCTION_INFO_
             System.Console.Write($"[ABC:{a}|{b}]");
+#endif
             ls.Push(!ls.ToBoolean(b));
             ls.Replace(a);
         }
@@ -311,7 +336,9 @@ namespace LuaVM.Net.Core
             var t = i.ABC();
             var a = t.Item1 + 1;
             var c = t.Item3;
+#if _SHOW_INSTRUCTION_INFO_
             System.Console.Write($"[ABC:{a}|N|{c}]");
+#endif
             if (ls.ToBoolean(a) != (c != 0))
             {
                 ls.AddPC(1);
@@ -326,7 +353,9 @@ namespace LuaVM.Net.Core
             var a = t.Item1 + 1;
             var b = t.Item2 + 1;
             var c = t.Item3;
+#if _SHOW_INSTRUCTION_INFO_
             System.Console.Write($"[ABC:{a}|{b}|{c}]");
+#endif
             if (ls.ToBoolean(b) == (c != 0))
             {
                 ls.Copy(b, a);
@@ -344,7 +373,9 @@ namespace LuaVM.Net.Core
             var t = i.AsBx();
             var a = t.Item1 + 1;
             var b = t.Item2;
+#if _SHOW_INSTRUCTION_INFO_
             System.Console.Write($"[AsBx:{a}|{b}]");
+#endif
             ls.PushV(a);
             ls.PushV(a + 2);
             ls.Arithmetic(Operations.LUA_OPSUB);
@@ -359,8 +390,9 @@ namespace LuaVM.Net.Core
             var t = i.AsBx();
             var a = t.Item1 + 1;
             var b = t.Item2;
+#if _SHOW_INSTRUCTION_INFO_
             System.Console.Write($"[AsBx:{a}|{b}]");
-            // R(A)+=R(A+2);
+#endif
             ls.PushV(a + 2);
             ls.PushV(a);
             ls.Arithmetic(Operations.LUA_OPADD);
@@ -370,7 +402,6 @@ namespace LuaVM.Net.Core
             if ((isPositiveStep  && ls.Compare(a, a + 1, Operations.LUA_OPLE)) ||
                 (!isPositiveStep && ls.Compare(a + 1, a, Operations.LUA_OPLE)))
             {
-                // pc+=sBx; R(A+3)=R(A)
                 ls.AddPC(b);
                 ls.Copy(a, a + 3);
             }
@@ -385,7 +416,9 @@ namespace LuaVM.Net.Core
             var a = abc.Item1 + 1;
             var b = abc.Item2;
             var c = abc.Item3;
+#if _SHOW_INSTRUCTION_INFO_
             System.Console.Write($"[ABC:{a}|{b}|{c}]");
+#endif
             ls.CreateTable(Fb2Int(b), Fb2Int(c));
             ls.Replace(a);
         }
@@ -399,7 +432,9 @@ namespace LuaVM.Net.Core
             var a = t.Item1 + 1;
             var b = t.Item2 + 1;
             var c = t.Item3;
+#if _SHOW_INSTRUCTION_INFO_
             System.Console.Write($"[ABC:{a}|{b}|{c}]");
+#endif
             ls.GetRK(c);
             ls.GetTable(b);
             ls.Replace(a);
@@ -414,7 +449,9 @@ namespace LuaVM.Net.Core
             var a = t.Item1 + 1;
             var b = t.Item2;
             var c = t.Item3;
+#if _SHOW_INSTRUCTION_INFO_
             System.Console.Write($"[ABC:{a}|{b}|{c}]");
+#endif
             ls.GetRK(b);
             ls.GetRK(c);
             ls.SetTable(a);
@@ -430,7 +467,9 @@ namespace LuaVM.Net.Core
             var a = t.Item1 + 1;
             var b = t.Item2;
             var c = t.Item3;
+#if _SHOW_INSTRUCTION_INFO_
             System.Console.Write($"[ABC:{a}|{b}|{c}]");
+#endif
             c = (c > 0) ? c - 1 : new Instruction(ls.Fetch()).Ax();
 
             var isZeroB = b == 0;
@@ -470,7 +509,9 @@ namespace LuaVM.Net.Core
             var t = i.ABx();
             var a = t.Item1 + 1;
             var b = t.Item2;
+#if _SHOW_INSTRUCTION_INFO_
             System.Console.Write($"[ABx:{a}|{b}]");
+#endif
             ls.LoadProto(b);
             ls.Replace(a);
         }
@@ -483,8 +524,9 @@ namespace LuaVM.Net.Core
             var a = t.Item1 + 1;
             var b = t.Item2;
             var c = t.Item3;
+#if _SHOW_INSTRUCTION_INFO_
             System.Console.Write($"[ABC:{a}|{b}|{c}]");
-            // println(":::"+ ls.StackToString())
+#endif
             var nArgs = PushFuncAndArgs(a, b, ls);
             ls.Call(nArgs, c - 1);
             PopResults(a, c, ls);
@@ -552,7 +594,9 @@ namespace LuaVM.Net.Core
             var t = i.ABC();
             var a = t.Item1 + 1;
             var b = t.Item2;
+#if _SHOW_INSTRUCTION_INFO_
             System.Console.Write($"[ABC:{a}|{b}]");
+#endif
             if (b == 1)
             {
                 return;// no return values
@@ -579,7 +623,9 @@ namespace LuaVM.Net.Core
             var t = i.ABC();
             var a = t.Item1 + 1;
             var b = t.Item2;
+#if _SHOW_INSTRUCTION_INFO_
             System.Console.Write($"[ABC:{a}|{b}]");
+#endif
             if (b != 1)
             {
                 // b == 0 or b > 1
@@ -594,7 +640,9 @@ namespace LuaVM.Net.Core
             var t = i.ABC();
             var a = t.Item1 + 1;
             var b = t.Item2;
+#if _SHOW_INSTRUCTION_INFO_
             System.Console.Write($"[ABC:{a}|{b}]");
+#endif
             // todo: optimize tail call!
             var c = 0;
             var nArgs = PushFuncAndArgs(a, b, ls);
@@ -610,7 +658,9 @@ namespace LuaVM.Net.Core
             var a = t.Item1 + 1;
             var b = t.Item2 + 1;
             var c = t.Item3;
+#if _SHOW_INSTRUCTION_INFO_
             System.Console.Write($"[ABC:{a}|{b}|{c}]");
+#endif
             ls.Copy(b, a + 1);
             ls.GetRK(c);
             ls.GetTable(b);
@@ -624,7 +674,9 @@ namespace LuaVM.Net.Core
             var t = i.ABC();
             var a = t.Item1 + 1;
             var b = t.Item2 + 1;
+#if _SHOW_INSTRUCTION_INFO_
             System.Console.Write($"[ABC:{a}|{b}]");
+#endif
             ls.Copy(GetUpvalueIndex(b), a);
         }
 
@@ -635,7 +687,9 @@ namespace LuaVM.Net.Core
             var t = i.ABC();
             var a = t.Item1 + 1;
             var b = t.Item2 + 1;
+#if _SHOW_INSTRUCTION_INFO_
             System.Console.Write($"[ABC:{a}|{b}]");
+#endif
             ls.Copy(a, GetUpvalueIndex(b));
         }
 
@@ -647,7 +701,9 @@ namespace LuaVM.Net.Core
             var a = t.Item1 + 1;
             var b = t.Item2 + 1;
             var c = t.Item3;
+#if _SHOW_INSTRUCTION_INFO_
             System.Console.Write($"[ABC:{a}|{b}|{c}]");
+#endif
             ls.GetRK(c);
             ls.GetTable(GetUpvalueIndex(b));
             ls.Replace(a);
@@ -661,7 +717,9 @@ namespace LuaVM.Net.Core
             var a = t.Item1 + 1;
             var b = t.Item2;
             var c = t.Item3;
+#if _SHOW_INSTRUCTION_INFO_
             System.Console.Write($"[ABC:{a}|{b}|{c}]");
+#endif
             ls.GetRK(b);
             ls.GetRK(c);
             var idx = GetUpvalueIndex(a);

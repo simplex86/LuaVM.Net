@@ -7,10 +7,10 @@ function counter()
 end
 
 a = counter()
-a()
-a()
+print(a())
+print(a())
 
 b = counter()
-b()
-b()
-b()
+print(b())
+print(b())
+print(b())

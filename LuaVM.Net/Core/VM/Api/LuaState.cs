@@ -33,6 +33,8 @@ namespace LuaVM.Net.Core
 
             var nstack = new LuaStack(StackSize.LUA_STACK_MIN, this);
             PushStack(nstack);
+
+            Register("print", Methods.Print);
         }
 
         // 加载prototype
@@ -63,8 +65,16 @@ namespace LuaVM.Net.Core
                 }
 
                 var c = v.GetFunction();
-                Console.WriteLine("\ncall {0}<{1},{2}>", c.proto.source, c.proto.lineDefined, c.proto.lastLineDefined);
-                CallClosure(args, results, c);
+                if (c.proto != null)
+                {
+                    //Console.WriteLine($"\ncall lua function {c.proto.source}<{c.proto.lineDefined},{c.proto.lastLineDefined}>");
+                    CallClosure(args, results, c);
+                }
+                else
+                {
+                    //Console.WriteLine("\ncall csharp function>");
+                    CallFunction(args, results, c);
+                }
             }
             catch(Exception ex)
             {
@@ -72,6 +82,7 @@ namespace LuaVM.Net.Core
             }
         }
 
+        // 调用Lua闭包
         private void CallClosure(int args, int results, Closure c)
         {
             var nRegs = (int)c.proto.maxStackSize;
@@ -105,6 +116,30 @@ namespace LuaVM.Net.Core
             }
         }
 
+        // 调用CSharp函数
+        private void CallFunction(int args, int results, Closure c)
+        {
+            var newStack = new LuaStack(args + StackSize.LUA_STACK_MIN, this);
+            newStack.closure = c;
+
+            var funcAndArgs = stack.PopN(args);
+            newStack.PushN(funcAndArgs, args);
+            stack.Pop();
+
+            // 调用函数
+            PushStack(newStack);
+            var rn = RunFunction(c);
+            PopStack();
+
+            // 返回值
+            if (results != 0)
+            {
+                var rs = newStack.PopN(rn);
+                stack.Check(rs.Length);
+                stack.PushN(rs, results);
+            }
+        }
+
         // 执行闭包
         private void RunClosure()
         {
@@ -118,6 +153,12 @@ namespace LuaVM.Net.Core
                     break;
                 }
             }
+        }
+
+        // 调用CSharp函数
+        private int RunFunction(Closure c)
+        {
+            return c.cfunc.Invoke(this);
         }
 
         // 从指定位置加载prototype
@@ -253,6 +294,13 @@ namespace LuaVM.Net.Core
             stack.Push(s);
         }
 
+        // 压入CSharp函数
+        public void Push(CSharpFunction func)
+        {
+            var c = new Closure(func);
+            stack.Push(c);
+        }
+
         // 把指定位置的压入栈顶
         public void PushV(int idx)
         {
@@ -363,14 +411,27 @@ namespace LuaVM.Net.Core
         public bool IsNumber(int idx)
         {
             var value = stack.Get(idx);
-            return value.IsFloat();
+            return (value == null) ? false : value.IsFloat();
         }
 
         // 判断索引位置是否为整数类型
         public bool IsInteger(int idx)
         {
             var value = stack.Get(idx);
-            return value.IsInteger();
+            return (value == null) ? false : value.IsInteger();
+        }
+
+        // 判断索引位置是否为整数类型
+        internal bool IsCSharpFunction(int idx)
+        {
+            var value = stack.Get(idx);
+            if (value == null || !value.IsFunction())
+            {
+                return false;
+            }
+
+            var c = value.GetFunction();
+            return c.cfunc != null;
         }
 
         // 把指定位置转换成布尔值(nil和false,其他为true)
@@ -482,6 +543,19 @@ namespace LuaVM.Net.Core
             return string.Empty;
         }
 
+        // 把指定位置转换成CSharp函数
+        public CSharpFunction ToCSharpFunction(int idx)
+        {
+            var v = stack.Get(idx);
+            if (LuaValue.GetType(v) != LuaType.LUA_TFUNCTION)
+            {
+                return null;
+            }
+
+            var c = v.GetFunction();
+            return c.cfunc;
+        }
+
         // 比较指定位置上的两个值
         public bool Compare(int idx1, int idx2, int op)
         {
@@ -584,24 +658,7 @@ namespace LuaVM.Net.Core
         public void GetConst(int idx)
         {
             var c = proto.constants[idx];
-            if (c == null)
-            {
-                stack.Push();
-                return;
-            }
-
-            switch (c.GetType().Name)
-            {
-                case "Int64":
-                    stack.Push((long)c);
-                    break;
-                case "Double":
-                    stack.Push((double)c);
-                    break;
-                case "String":
-                    stack.Push(c as string);
-                    break;
-            }
+            stack.Push(c);
         }
 
         // 将指定位置的常量或栈值压到栈顶
@@ -745,6 +802,12 @@ namespace LuaVM.Net.Core
             var v = stack.Pop();
             SetTable(t, new LuaValue(name), v);
             registry.Set(StateReg.LUA_REGISTRY_GLOBALS, t);
+        }
+
+        public void Register(string name, CSharpFunction func)
+        {
+            Push(func);
+            SetGlobal(name);
         }
 
         // 闭合Upvalue

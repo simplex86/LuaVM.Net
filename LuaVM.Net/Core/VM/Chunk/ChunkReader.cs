@@ -164,9 +164,9 @@ namespace LuaVM.Net.Core
             return upvalues;
         }
 
-        private object[] ReadConstants()
+        private LuaValue[] ReadConstants()
         {
-            var constants = new object[ReadUInt32()];
+            var constants = new LuaValue[ReadUInt32()];
             for (var i = 0; i < constants.Length; i++)
             {
                 constants[i] = ReadConstant();
@@ -175,17 +175,30 @@ namespace LuaVM.Net.Core
             return constants;
         }
 
-        private object ReadConstant()
+        private LuaValue ReadConstant()
         {
             switch (ReadByte())
             {
-                case ChunkValues.TAG_NIL:       return null;
-                case ChunkValues.TAG_BOOLEAN:   return ReadByte() != 0;
-                case ChunkValues.TAG_INTEGER:   return ReadLuaInteger();
-                case ChunkValues.TAG_NUMBER:    return ReadLuaNumber();
-                case ChunkValues.TAG_SHORT_STR: return ReadString();
-                case ChunkValues.TAG_LONG_STR:  return ReadString();
-                default: throw new Exception("corrupted!");
+                case ChunkValues.TAG_NIL:
+                    return new LuaValue();
+                case ChunkValues.TAG_BOOLEAN:
+                    var b = ReadByte() != 0;
+                    return new LuaValue(b);
+                case ChunkValues.TAG_INTEGER:
+                    var i = ReadLuaInteger();
+                    return new LuaValue(i);
+                case ChunkValues.TAG_NUMBER:
+                    var n = ReadLuaNumber();
+                    return new LuaValue(n);
+                case ChunkValues.TAG_SHORT_STR:
+                    var s = ReadString();
+                    return new LuaValue(s);
+                case ChunkValues.TAG_LONG_STR:
+                    var ls = ReadString();
+                    return new LuaValue(ls);
+                default:
+                    Error.Commit("corrupted!");
+                    return null;
             }
         }
 
