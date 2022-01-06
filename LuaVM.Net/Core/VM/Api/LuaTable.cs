@@ -6,8 +6,10 @@ namespace LuaVM.Net.Core
 {
     class LuaTable
     {
-        private List<LuaValue> arr;
-        private Dictionary<int, LuaValue> map;
+        private List<LuaValue> arr = null;
+        private Dictionary<int, LuaValue> map = null;
+
+        internal LuaTable metatable { get; set; } = null;
 
         public LuaTable()
             : this(0, 0)
@@ -104,6 +106,16 @@ namespace LuaVM.Net.Core
         public int Len()
         {
             return arr.Count;
+        }
+
+        internal bool HasMetafield(string name)
+        {
+            if (metatable == null)
+            {
+                return false;
+            }
+
+            return Get(new LuaValue(name)) != null;
         }
 
         private void ShrinkArray()

@@ -7,7 +7,7 @@ namespace LuaVM.Net.Core
     public class LuaState
     {
         // 栈
-        private LuaStack stack;
+        internal LuaStack stack { get; private set; }
 
         private Prototype proto
         {
@@ -34,7 +34,10 @@ namespace LuaVM.Net.Core
             var nstack = new LuaStack(StackSize.LUA_STACK_MIN, this);
             PushStack(nstack);
 
-            Register("print", Methods.Print);
+            foreach (var kvp in Methods.dict)
+            {
+                Register(kvp.Key, kvp.Value);
+            }
         }
 
         // 加载prototype
@@ -58,13 +61,26 @@ namespace LuaVM.Net.Core
             try
             {
                 var v = stack.Get(-(args + 1));
-                if (!v.IsFunction())
+                Closure c = v.IsFunction() ? v.GetFunction() : null;
+
+                if (c == null)
+                {
+                    var mf = GetMetafield(v, new LuaValue("__call"), this);
+                    if (mf != null && mf.IsFunction())
+                    {
+                        stack.Push();
+                        Insert(-(args + 2));
+                        args++;
+                        c = mf.GetFunction();
+                    }
+                }
+
+                if (c == null)
                 {
                     Error.Commit("\ntry to call a non-function type!");
                     return;
                 }
 
-                var c = v.GetFunction();
                 if (c.proto != null)
                 {
                     //Console.WriteLine($"\ncall lua function {c.proto.source}<{c.proto.lineDefined},{c.proto.lastLineDefined}>");
@@ -559,14 +575,13 @@ namespace LuaVM.Net.Core
         // 比较指定位置上的两个值
         public bool Compare(int idx1, int idx2, int op)
         {
-            if (!stack.IsValid(idx1) || !stack.IsValid(idx2))
-            {
-                return false;
-            }
-            var a = stack.Get(idx1);
-            var b = stack.Get(idx2);
+            return Core.Compare.Do(idx1, idx2, op, this);
+        }
 
-            return Core.Compare.Do(a, b, op);
+        // 比较指定位置上的两个值是否相等（不访问元表）
+        public bool RawEqual(int idx1, int idx2)
+        {
+            return Core.Compare.RawEqual(idx1, idx2, this);
         }
 
         // 计算
@@ -580,13 +595,19 @@ namespace LuaVM.Net.Core
                 a = stack.Pop();
             }
 
-            var r = Core.Arithmetic.Do(a, b, op);
-            if (r == null)
+            var r = Core.Arithmetic.Do(a, b, op, this);
+            if (r != null)
             {
-                Error.Commit("arithmetic error!");
+                stack.Push(r);
                 return;
             }
-            stack.Push(r);
+
+            if (Core.Arithmetic.DoMetamethod(a, b, op, this))
+            {
+                return;
+            }
+
+            Error.Commit("arithmetic error!");
         }
 
         // 长度
@@ -597,16 +618,24 @@ namespace LuaVM.Net.Core
             {
                 var n = String.Len(v);
                 stack.Push(n);
+                return;
             }
-            else if (v.IsTable())
+
+            var r = CallMetamethod(v, v, "__len", this);
+            if (r.Item2)
+            {
+                stack.Push(r.Item1);
+                return;
+            }
+
+            if (v.IsTable())
             {
                 var n = Table.Len(v);
                 stack.Push(n);
+                return;
             }
-            else
-            {
-                Error.Commit("length error!");
-            }
+
+            Error.Commit("length error!");
         }
 
         // 连接
@@ -624,20 +653,51 @@ namespace LuaVM.Net.Core
                 {
                     if (IsString(-1) && IsString(-2))
                     {
-                        var b = stack.Get(-1);
-                        var a = stack.Get(-2);
+                        var s1 = stack.Get(-2);
+                        var s2 = stack.Get(-1);
 
                         stack.Pop();
                         stack.Pop();
 
-                        var s = String.Concat(a, b);
+                        var s = String.Concat(s1, s2);
                         stack.Push(s);
 
                         continue;
                     }
+
+                    var a = stack.Pop();
+                    var b = stack.Pop();
+                    var r = CallMetamethod(a, b, "__concat", this);
+                    if (r.Item2)
+                    {
+                        stack.Push(r.Item1);
+                        continue;
+                    }
+
                     Error.Commit("string concatenation error!");
                 }
             }
+        }
+
+        public uint RawLen(int idx)
+        {
+            var v = stack.Get(idx);
+
+            if (LuaValue.GetType(v) == LuaType.LUA_TNIL)
+            {
+                return 0;
+            }
+
+            if (v.IsString())
+            {
+                return (uint)v.GetString().Length;
+            }
+            if (v.IsTable())
+            {
+                return (uint)v.GetTable().Len();
+            }
+
+            return 0;
         }
 
         // 增加PC
@@ -727,6 +787,34 @@ namespace LuaVM.Net.Core
             return GetTable(t, k);
         }
 
+        public int RawGet(int idx)
+        {
+            var t = stack.Get(idx);
+            var k = stack.Pop();
+            return GetTable(t, k, true);
+        }
+
+        public void RawSet(int idx)
+        {
+            var t = stack.Get(idx);
+            var v = stack.Pop();
+            var k = stack.Pop();
+            SetTable(t, k, v, true);
+        }
+
+        public int RawGetI(int idx, long i)
+        {
+            var t = stack.Get(idx);
+            return GetTable(t, new LuaValue(i), true);
+        }
+
+        public void RawSetI(int idx, long i)
+        {
+            var t = stack.Get(idx);
+            var v = stack.Pop();
+            SetTable(t, new LuaValue(i), v, true);
+        }
+
         // 设置 idx 位置的table中 k 键值的值
         public void SetField(int idx, string s)
         {
@@ -735,18 +823,43 @@ namespace LuaVM.Net.Core
             SetTable(idx, k, v);
         }
 
-        private int GetTable(LuaValue t, LuaValue k)
+        private int GetTable(LuaValue t, LuaValue k, bool raw = false)
         {
-            if (LuaValue.GetType(t) != LuaType.LUA_TTABLE)
+            if (LuaValue.GetType(t) == LuaType.LUA_TTABLE)
             {
-                Error.Commit("LuaState GetTable: not a table!");
-                return LuaType.LUA_TNONE;
+                var o = t.GetTable();
+                var v = o.Get(k);
+                if (raw || LuaValue.GetType(v) != LuaType.LUA_TNIL || o.HasMetafield("__index"))
+                {
+                    stack.Push(v);
+                    return v.type;
+                }
             }
 
-            var v = t.GetTable().Get(k);
-            stack.Push(v);
+            if (!raw)
+            {
+                var m = GetMetafield(t, new LuaValue("__index"), this);
+                if (LuaValue.GetType(m) != LuaType.LUA_TNIL)
+                {
+                    if (m.IsTable())
+                    {
+                        GetTable(m, k, false);
+                    }
+                    else if (m.IsFunction())
+                    {
+                        var mc = m.GetFunction();
+                        stack.Push(mc);
+                        stack.Push(t);
+                        stack.Push(k);
+                        Call(2, 1);
+                        var v = stack.Get(-1);
+                        return v.type;
+                    }
+                }
+            }
 
-            return v.type;
+            Error.Commit("LuaState GetTable: not a table!");
+            return LuaType.LUA_TNONE;
         }
 
         private void SetTable(int idx, LuaValue k, LuaValue v)
@@ -755,12 +868,39 @@ namespace LuaVM.Net.Core
             SetTable(t, k, v);
         }
 
-        private void SetTable(LuaValue t, LuaValue k, LuaValue v)
+        private void SetTable(LuaValue t, LuaValue k, LuaValue v, bool raw = false)
         {
             if (LuaValue.GetType(t) == LuaType.LUA_TTABLE)
             {
-                t.GetTable().Set(k, v);
-                return;
+                var o = t.GetTable();
+                if (raw || LuaValue.GetType(v) != LuaType.LUA_TNIL || o.HasMetafield("__newindex"))
+                {
+                    o.Set(k, v);
+                    return;
+                }
+            }
+
+            if (!raw)
+            {
+                var m = GetMetafield(t, new LuaValue("__newindex"), this);
+                if (LuaValue.GetType(m) != LuaType.LUA_TNIL)
+                {
+                    if (m.IsTable())
+                    {
+                        SetTable(m, k, v, false);
+                        return;
+                    }
+                    else if (m.IsFunction())
+                    {
+                        var mc = m.GetFunction();
+                        stack.Push(mc);
+                        stack.Push(t);
+                        stack.Push(k);
+                        stack.Push(v);
+                        Call(3, 0);
+                        return;
+                    }
+                }
             }
 
             Error.Commit("LuaState SetTable: not a table!");
@@ -810,6 +950,41 @@ namespace LuaVM.Net.Core
             SetGlobal(name);
         }
 
+        public bool GetMetatable(int idx)
+        {
+            var v = stack.Get(idx);
+            var m = LuaValue.GetMetatable(v, this);
+
+            if (m != null)
+            {
+                stack.Push(m);
+                return true;
+            }
+
+            return false;
+        }
+
+        public void SetMetatable(int idx)
+        {
+            var v = stack.Get(idx);
+            var m = stack.Pop();
+
+            if (LuaValue.GetType(m) == LuaType.LUA_TNIL)
+            {
+                LuaValue.SetMetatable(v, null, this);
+            }
+            else if (m.IsTable())
+            {
+                var t = m.GetTable();
+                LuaValue.SetMetatable(v, t, this);
+            }
+            else
+            {
+                // TODO
+                Error.Commit("table.expected");
+            }
+        }
+
         // 闭合Upvalue
         internal void CloseUpvalues(int n)
         {
@@ -837,6 +1012,40 @@ namespace LuaVM.Net.Core
         internal void PrintStack(string prefix)
         {
             stack.Print(prefix);
+        }
+
+        internal static Tuple<LuaValue, bool> CallMetamethod(LuaValue a, LuaValue b, string metamethod, LuaState ls)
+        {
+            var k = new LuaValue(metamethod);
+
+            var m = GetMetafield(a, k, ls);
+            if (m == null)
+            {
+                m = GetMetafield(b, k, ls);
+                if (m == null)
+                {
+                    return Tuple.Create<LuaValue, bool>(null, false);
+                }
+            }
+
+            ls.stack.Check(4);
+            ls.stack.Push(m);
+            ls.stack.Push(a);
+            ls.stack.Push(b);
+            ls.Call(2, 1);
+
+            var r = ls.stack.Pop();
+            return Tuple.Create(r, true);
+        }
+
+        private static LuaValue GetMetafield(LuaValue v, LuaValue k, LuaState ls)
+        {
+            var mt = LuaValue.GetMetatable(v, ls);
+            if (mt != null)
+            {
+                mt.Get(k);
+            }
+            return null;
         }
     }
 }

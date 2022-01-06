@@ -4,89 +4,56 @@ namespace LuaVM.Net.Core
 {
     internal static class Arithmetic
     {
-        public static LuaValue Do(LuaValue a, LuaValue b, int op)
+        public static LuaValue Do(LuaValue a, LuaValue b, int op, LuaState ls)
         {
             var oper = operators[op];
-            return Do(a, b, oper);
+            return Do(a, b, oper, ls);
+        }
+
+        public static bool DoMetamethod(LuaValue a, LuaValue b, int op, LuaState ls)
+        {
+            var mm = operators[op].metamethod;
+            var rt = LuaState.CallMetamethod(a, b, mm, ls);
+
+            if (rt.Item2)
+            {
+                ls.stack.Push(rt.Item1);
+            }
+
+            return rt.Item2;
         }
 
         private class Operator
         {
+            public string metamethod;
             public Func<long, long, long> integerFunc;
             public Func<double, double, double> floatFunc;
+
+            public Operator(string metamethod, 
+                            Func<long, long, long> integerFunc, 
+                            Func<double, double, double> floatFunc)
+            {
+                this.metamethod = metamethod;
+                this.integerFunc = integerFunc;
+                this.floatFunc = floatFunc;
+            }
         }
 
         private static Operator[] operators = new Operator[] {
-            new Operator
-            {
-                integerFunc = iadd,
-                floatFunc = fadd
-            },
-            new Operator
-            {
-                integerFunc = isub,
-                floatFunc = fsub
-            },
-            new Operator
-            {
-                integerFunc = imul,
-                floatFunc = fmul
-            },
-            new Operator
-            {
-                integerFunc = imod,
-                floatFunc = fmod
-            },
-            new Operator
-            {
-                integerFunc = null,
-                floatFunc = pow
-            },
-            new Operator
-            {
-                integerFunc = null,
-                floatFunc = div
-            },
-            new Operator
-            {
-                integerFunc = iidiv,
-                floatFunc = fidiv
-            },
-            new Operator
-            {
-                integerFunc = band,
-                floatFunc = null
-            },
-            new Operator
-            {
-                integerFunc = bor,
-                floatFunc = null
-            },
-            new Operator
-            {
-                integerFunc = bxor,
-                floatFunc = null
-            },
-            new Operator
-            {
-                integerFunc = shl,
-                floatFunc = null
-            },
-            new Operator
-            {
-                integerFunc = shr,
-                floatFunc = null
-            },
-            new Operator
-            {
-                integerFunc = inum,
-                floatFunc = fnum
-            },
-            new Operator
-            {
-                integerFunc = bnot,
-                floatFunc = null
-            }
+            new Operator("__add",  iadd,  fadd),
+            new Operator("__sub",  isub,  fsub),
+            new Operator("__mul",  imul,  fmul),
+            new Operator("__mod",  imod,  fmod),
+            new Operator("__pow",  null,  pow),
+            new Operator("__div",  null,  div),
+            new Operator("__idiv", iidiv, fidiv),
+            new Operator("__band", band,  null),
+            new Operator("__bor",  bor,   null),
+            new Operator("__bxor", bxor,  null),
+            new Operator("__shl",  shl,   null),
+            new Operator("__shr",  shr,   null),
+            new Operator("__num",  inum,  fnum),
+            new Operator("__bnot", bnot,  null),
         };
 
         private static long iadd(long a, long b)
@@ -189,7 +156,7 @@ namespace LuaVM.Net.Core
             return ~a;
         }
 
-        private static LuaValue Do(LuaValue a, LuaValue b, Operator op)
+        private static LuaValue Do(LuaValue a, LuaValue b, Operator op, LuaState ls)
         {
             if (op.floatFunc == null)
             {
@@ -221,7 +188,7 @@ namespace LuaVM.Net.Core
                     var n = op.floatFunc(v1.Item1, v2.Item1);
                     return new LuaValue(n);
                 }
-            }
+            }            
 
             return null;
         }

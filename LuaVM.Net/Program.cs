@@ -8,7 +8,7 @@ namespace LuaVM.Net
     {
         static void Main(string[] args)
         {
-            TestClosure();
+            TestMetatable();
             // pause
             Console.Write("\npress any key to be continue...");
             Console.ReadKey();
@@ -71,6 +71,12 @@ namespace LuaVM.Net
         {
             var test = new TestClosure();
             test.Do(@"Luas\closure.out");
+        }
+
+        static void TestMetatable()
+        {
+            var test = new TestMetatable();
+            test.Do(@"Luas\metatable.out");
         }
     }
 }

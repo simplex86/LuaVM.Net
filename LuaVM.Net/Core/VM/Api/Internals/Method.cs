@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace LuaVM.Net.Core
 {
@@ -34,11 +35,33 @@ namespace LuaVM.Net.Core
         }
     }
 
+    internal class GetMetatable : CSharpFunction
+    {
+        internal override int Invoke(LuaState ls)
+        {
+            if (!ls.GetMetatable(1))
+            {
+                ls.Push();
+            }
+            return 1;
+        }
+    }
+
+    internal class SetMetatable : CSharpFunction
+    {
+        internal override int Invoke(LuaState ls)
+        {
+            ls.SetMetatable(1);
+            return 1;
+        }
+    }
+
     internal static class Methods
     {
-        internal static CSharpFunction Print
-        {
-            get { return new Print(); }
-        }
+        internal static Dictionary<string, CSharpFunction> dict { get; } = new Dictionary<string, CSharpFunction>() {
+             { "print",         new Print() },
+             { "getmetatable",  new GetMetatable() },
+             { "setmetatable",  new SetMetatable() },
+        };
     }
 }

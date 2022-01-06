@@ -104,7 +104,8 @@ namespace LuaVM.Net.Core
         {
             if (top == capacity)
             {
-                throw new Exception("stack overflow!");
+                Error.Commit("stack overflow!");
+                return;
             }
 
             if (value == null)
@@ -121,7 +122,8 @@ namespace LuaVM.Net.Core
         {
             if (top < 1)
             {
-                throw new Exception("stack overflow!");
+                Error.Commit("stack overflow!");
+                return null;
             }
 
             top--;
@@ -172,10 +174,10 @@ namespace LuaVM.Net.Core
             }
 
             var absIdx = GetAbsIndex(idx);
-            //Console.WriteLine($"{idx} -> {absIdx}");
             if (absIdx <= 0 || absIdx > top)
             {
-                throw new Exception("invalid stack index!");
+                Error.Commit("invalid stack index!");
+                return;
             }
             slots[absIdx - 1] = value;
         }

@@ -304,7 +304,9 @@ namespace LuaVM.Net.Core
         {
             return type == LuaType.LUA_TFUNCTION;
         }
-
+        
+        // 转换成整数（包括小数和字符串）
+        // 如果转换失败，则返回0和false
         public static Tuple<long, bool> ToInteger(LuaValue value)
         {
             if (value.IsInteger())
@@ -331,6 +333,8 @@ namespace LuaVM.Net.Core
             return Tuple.Create(0L, false);
         }
 
+        // 转换成小数（包括整数和字符串）
+        // 如果转换失败，则返回0和false
         public static Tuple<double, bool> ToFloat(LuaValue value)
         {
             if (value.IsInteger())
@@ -357,6 +361,8 @@ namespace LuaVM.Net.Core
             return Tuple.Create(0.0, false);
         }
 
+        // 转换成字符串（包括整数和小数）
+        // 如果转换失败，则返回空字符串和false
         public static Tuple<string, bool> ToString(LuaValue value)
         {
             if (value.IsString())
@@ -377,6 +383,50 @@ namespace LuaVM.Net.Core
             }
 
             return Tuple.Create("", false);
+        }
+
+        // 设置metatable
+        public static void SetMetatable(LuaValue value, LuaTable mt, LuaState ls)
+        {
+            if (LuaValue.GetType(value) == LuaType.LUA_TNIL)
+            {
+                Error.Commit("can't set metatable to nil value");
+                return;
+            }
+
+            if (value.IsTable())
+            {
+                var t = value.GetTable();
+                t.metatable = mt;
+            }
+            else
+            {
+                var key = $"_LUA_MT{value.type}";
+                ls.registry.Set(new LuaValue(key), new LuaValue(mt));
+            }
+        }
+
+        // 获取metatable
+        public static LuaTable GetMetatable(LuaValue value, LuaState ls)
+        {
+            //if (LuaValue.GetType(value) == LuaType.LUA_TNIL)
+            //{
+            //    Error.Commit("can't get metatable from nil value");
+            //    return null;
+            //}
+
+            if (value.IsTable())
+            {
+                return value.GetTable().metatable;
+            }
+            
+            var mt = ls.registry.Get(new LuaValue($"_MT{value.type}"));
+            if (mt != null && mt.IsTable())
+            {
+                return mt.GetTable();
+            }
+
+            return null;
         }
 
         private UValue u
