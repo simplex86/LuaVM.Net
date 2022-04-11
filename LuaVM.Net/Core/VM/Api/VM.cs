@@ -12,7 +12,7 @@ namespace LuaVM.Net.Core
             var t = i.ABC();
             var a = t.Item1 + 1;
             var b = t.Item2 + 1;
-            ls.Copy(a, b);
+            ls.Copy(b, a);
         }
 
         // JMP
@@ -368,6 +368,280 @@ namespace LuaVM.Net.Core
                 ls.Copy(a, a + 3);
             }
         }
+
+        // CLOSURE
+        // R(A) := closure(KPROTO[Bx])
+        internal static void Closure(Instruction i, LuaState ls)
+        {
+            var t = i.ABx();
+            var a = t.Item1 + 1;
+            var b = t.Item2;
+
+            ls.LoadProto(b);
+            ls.Replace(a);
+        }
+
+        // CALL
+        // R(A), ... ,R(A+C-2) := R(A)(R(A+1), ... ,R(A+B-1))
+        internal static void Call(Instruction i, LuaState ls)
+        {
+            var t = i.ABC();
+            var a = t.Item1 + 1;
+            var b = t.Item2;
+            var c = t.Item3;
+
+            // println(":::"+ vm.StackToString())
+            var nArgs = PushFuncAndArgs(a, b, ls);
+            ls.Call(nArgs, c - 1);
+            PopResults(a, c, ls);
+        }
+
+        // RETURN
+        // return R(A), ... ,R(A+B-2)
+        internal static void Return(Instruction i, LuaState ls)
+        {
+            var t = i.ABC();
+            var a = t.Item1 + 1;
+            var b = t.Item2;
+
+            if (b == 1)
+            {
+                // no return values
+            }
+            else if (b > 1)
+            {
+                // b-1 return values
+                ls.Check(b - 1);
+                for (var j = a; j <= a + b - 2; j++)
+                {
+                    ls.PushX(j);
+                }
+            }
+            else
+            {
+                FixStack(a, ls);
+            }
+        }
+
+        // VARARG
+        // R(A), R(A+1), ..., R(A+B-2) = vararg
+        internal static void Vararg(Instruction i, LuaState ls)
+        {
+            var t = i.ABC();
+            var a = t.Item1 + 1;
+            var b = t.Item2;
+
+            if (b != 1)
+            {
+                // b==0 or b>1
+                ls.LoadVararg(b - 1);
+                PopResults(a, b, ls);
+            }
+        }
+
+        // TAILCALL
+        // return R(A)(R(A+1), ... ,R(A+B-1))
+        internal static void TailCall(Instruction i, LuaState ls)
+        {
+            var t = i.ABC();
+            var a = t.Item1 + 1;
+            var b = t.Item2;
+
+            // TODO XH: optimize tail call!
+            var c = 0;
+            var nArgs = PushFuncAndArgs(a, b, ls);
+            ls.Call(nArgs, c - 1);
+            PopResults(a, c, ls);
+        }
+
+        // R(A+1) := R(B); R(A) := R(B)[RK(C)]
+        internal static void Self(Instruction i, LuaState ls)
+        {
+            var t = i.ABC();
+            var a = t.Item1 + 1;
+            var b = t.Item2 + 1;
+            var c = t.Item3;
+
+            ls.Copy(b, a + 1);
+            ls.PushRK(c);
+            ls.GetTable(b);
+            ls.Replace(a);
+        }
+
+        private static int PushFuncAndArgs(int a, int b, LuaState ls)
+        {
+            if (b >= 1)
+            {
+                ls.Check(b);
+                for (var i = a; i < a + b; i++)
+                {
+                    ls.PushX(i);
+                }
+
+                return b - 1;
+            }
+
+            FixStack(a, ls);
+            return ls.GetTop() - ls.registerCount - 1;
+        }
+
+        private static void FixStack(int a, LuaState ls)
+        {
+            var x = (int)ls.ToInteger(-1);
+            ls.Pop(1);
+
+            ls.Check(x - a);
+            for (var i = a; i < x; i++)
+            {
+                ls.PushX(i);
+            }
+
+            ls.Rotate(ls.registerCount + 1, x - a);
+        }
+
+        private static void PopResults(int a, int c, LuaState ls)
+        {
+            if (c == 1)
+            {
+                // no results
+            }
+            else if (c > 1)
+            {
+                for (var i = a + c - 2; i >= a; i--)
+                {
+                    ls.Replace(i);
+                }
+            }
+            else
+            {
+                // leave results on stack
+                ls.Check(1);
+                ls.Push(a);
+            }
+        }
+
+        internal static void NewTable(Instruction i, LuaState ls)
+        {
+            var t = i.ABC();
+            var a = t.Item1 + 1;
+            var b = t.Item2;
+            var c = t.Item3;
+ 
+            ls.CreateTable(Int2Fb(b), Fb2Int(c));
+            ls.Replace(a);
+        }
+
+        private static int Int2Fb(int x)
+        {
+            var e = 0;
+            if (x < 8)
+            {
+                return x;
+            }
+
+            for (; x >= (8 << 4);)
+            {
+                x = (x + 0xf) >> 4;
+                e += 4;
+            }
+
+            for (; x >= (8 << 1);)
+            {
+                x = (x + 1) >> 1;
+                e++;
+            }
+
+            return ((e + 1) << 3) | (x - 8);
+        }
+
+        private static int Fb2Int(int x)
+        {
+            if (x < 8)
+            {
+                return x;
+            }
+            else
+            {
+                return ((x & 7 + 8)) << ((x >> 3) - 1);
+            }
+        }
+
+        internal static void GetTable(Instruction i, LuaState ls)
+        {
+            var t = i.ABC();
+            var a = t.Item1;
+            var b = t.Item2;
+            var c = t.Item3;
+
+            a += 1;
+            b += 1;
+            ls.PushRK(c);
+            ls.GetTable(b);
+            ls.Replace(a);
+        }
+
+        internal static void SetTable(Instruction i, LuaState ls)
+        {
+            var t = i.ABC();
+            var a = t.Item1;
+            var b = t.Item2;
+            var c = t.Item3;
+
+            a += 1;
+
+            ls.PushRK(b);
+            ls.PushRK(c);
+            ls.SetTable(a);
+        }
+
+        private const long LFIELDS_PER_FLUSH = 50;
+
+        internal static void SetList(Instruction i, LuaState ls)
+        {
+            var t = i.ABC();
+            var a = t.Item1 + 1;
+            var b = t.Item2;
+            var c = t.Item3;
+
+            if (c > 0)
+            {
+                c = c - 1;
+            }
+            else
+            {
+                c = new Instruction(ls.Fetch()).Ax();
+            }
+
+            var iszero = b == 0;
+            if (iszero)
+            {
+                b = (int)ls.ToInteger(-1) - a - 1;
+                ls.Pop(1);
+            }
+
+            ls.Check(1);
+            var idx = c * LFIELDS_PER_FLUSH;
+            for (var k = 1; k <= b; k++)
+            {
+                idx++;
+                ls.PushX(a + k);
+                ls.SetI(a, idx);
+            }
+
+            if (iszero)
+            {
+                for (var k = ls.registerCount + 1; k <= ls.GetTop(); k++)
+                {
+                    idx++;
+                    ls.PushX(k);
+                    ls.SetI(a, idx);
+                }
+
+                // clear stack
+                ls.SetTop(ls.registerCount);
+            }
+        }
+
 
         // 对暂未实现的指令，可以先执行此函数，以求编译通过编译测试已实现的指令函数
         internal static void Func(Instruction i, LuaState ls)

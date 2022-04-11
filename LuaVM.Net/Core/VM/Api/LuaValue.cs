@@ -42,6 +42,16 @@ namespace LuaVM.Net.Core
         {
             o = s;
         }
+
+        public void Set(Closure c)
+        {
+            o = c;
+        }
+
+        public void Set(LuaTable t)
+        {
+            o = t;
+        }
     }
 
     // 数据（值 + 类型）
@@ -130,6 +140,16 @@ namespace LuaVM.Net.Core
             Set(s);
         }
 
+        public LuaValue(Closure c)
+        {
+            Set(c);
+        }
+
+        public LuaValue(LuaTable t)
+        {
+            Set(t);
+        }
+
         // 获取数据类型
         public int type
         {
@@ -180,6 +200,28 @@ namespace LuaVM.Net.Core
             value.t = LuaType.LUA_TSTRING;
         }
 
+        // 设值
+        public void Set(Closure c)
+        {
+            if (value == null)
+            {
+                value = new TValue();
+            }
+            value.v.Set(c);
+            value.t = LuaType.LUA_TFUNCTION;
+        }
+
+        // 设值
+        public void Set(LuaTable t)
+        {
+            if (value == null)
+            {
+                value = new TValue();
+            }
+            value.v.Set(t);
+            value.t = LuaType.LUA_TTABLE;
+        }
+
         public bool GetBoolean()
         {
             return u.b;
@@ -198,6 +240,16 @@ namespace LuaVM.Net.Core
         public string GetString()
         {
             return o as string;
+        }
+
+        public Closure GetFunction()
+        {
+            return o as Closure;
+        }
+
+        public LuaTable GetTable()
+        {
+            return o as LuaTable;
         }
 
         // 是否为nil
@@ -266,6 +318,28 @@ namespace LuaVM.Net.Core
             return type == LuaType.LUA_TSTRING;
         }
 
+        // 是否为函数
+        public bool IsFunction()
+        {
+            if (value == null)
+            {
+                return false;
+            }
+
+            return type == LuaType.LUA_TFUNCTION;
+        }
+
+        // 是否为table
+        public bool IsTable()
+        {
+            if (value == null)
+            {
+                return false;
+            }
+
+            return type == LuaType.LUA_TTABLE;
+        }
+
         public static Tuple<long, bool> ToInteger(LuaValue value)
         {
             if (value.IsInteger())
@@ -282,8 +356,7 @@ namespace LuaVM.Net.Core
             if (value.IsString())
             {
                 var s = value.GetString();
-                long n = 0;
-                if (long.TryParse(s, out n))
+                if (long.TryParse(s, out long n))
                 {
                     return Tuple.Create(n, true);
                 }
@@ -308,8 +381,7 @@ namespace LuaVM.Net.Core
             if (value.IsString())
             {
                 var s = value.GetString();
-                double n = 0;
-                if (double.TryParse(s, out n))
+                if (double.TryParse(s, out double n))
                 {
                     return Tuple.Create(n, true);
                 }

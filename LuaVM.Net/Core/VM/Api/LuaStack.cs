@@ -3,9 +3,14 @@ using System.Collections.Generic;
 
 namespace LuaVM.Net.Core
 {
-    internal struct LuaStack
+    internal class LuaStack
     {
         private List<LuaValue> slots;
+
+        internal LuaStack prev { get; set; }
+        internal Closure closure { get; set; }
+        internal LuaValue[] varargs { get; set; }
+        internal int pc { get; set; } = 0;
 
         internal LuaStack(int n)
         {
@@ -61,11 +66,45 @@ namespace LuaVM.Net.Core
             Push(new LuaValue(value));
         }
 
+        // 压栈
+        internal void Push(Closure value)
+        {
+            Push(new LuaValue(value));
+        }
+
+        // 压栈
+        internal void Push(LuaTable value)
+        {
+            Push(new LuaValue(value));
+        }
+
+        internal void PushN(LuaValue[] vals, int n)
+        {
+            var m = vals.Length;
+            if (n < 0)
+            {
+                n = m;
+            }
+
+            for (var i = 0; i < n; i++)
+            {
+                if (i < m)
+                {
+                    Push(vals[i]);
+                }
+                else
+                {
+                    Push();
+                }
+            }
+        }
+
+        // 压栈
         internal void Push(LuaValue value)
         {
             if (top == capacity)
             {
-                throw new Exception("stack overflow!");
+                Error.Commit("stack overflow!");
             }
 
             if (value == null)
@@ -82,7 +121,7 @@ namespace LuaVM.Net.Core
         {
             if (top < 1)
             {
-                throw new Exception("stack overflow!");
+                Error.Commit("stack overflow!");
             }
 
             top--;
@@ -90,6 +129,17 @@ namespace LuaVM.Net.Core
             slots[top] = null;
 
             return v;
+        }
+
+        internal LuaValue[] PopN(int n)
+        {
+            var vals = new LuaValue[n];
+            for (var i = n - 1; i >= 0; i--)
+            {
+                vals[i] = Pop();
+            }
+
+            return vals;
         }
 
         // 设置指定索引位置的值
@@ -117,12 +167,18 @@ namespace LuaVM.Net.Core
         }
 
         // 设置指定索引位置的值
+        internal void Set(int idx, LuaTable value)
+        {
+            Set(idx, new LuaValue(value));
+        }
+
+        // 设置指定索引位置的值
         internal void Set(int idx, LuaValue value)
         {
             idx = GetAbsIndex(idx);
             if (idx <= 0 || idx > top)
             {
-                throw new Exception("invalid stack index!");
+                Error.Commit("invalid stack index!");
             }
             slots[idx - 1] = value;
         }
@@ -164,7 +220,7 @@ namespace LuaVM.Net.Core
         }
 
         // 栈顶索引值
-        internal int top { get; private set; }
+        internal int top { get; set; }
 
         // 栈的容量
         private int capacity

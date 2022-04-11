@@ -1,29 +1,125 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace LuaVM.Net.Core
 {
     public class LuaState
     {
-        private LuaStack  stack;
-        private Prototype proto;
+        private LuaStack stack;
 
-        public int pc { get; private set; } = 0;
+        private Prototype proto
+        {
+            get { return stack.closure.proto; }
+        }
 
         public LuaState()
         {
-            this.stack = new LuaStack(32);
+            stack = new LuaStack(32);
         }
 
         public LuaState(int size)
         {
-            this.stack = new LuaStack(size);
+            stack = new LuaStack(size);
         }
 
         public LuaState(int size, Prototype proto)
         {
-            this.stack = new LuaStack(size);
-            this.proto = proto;
+            stack = new LuaStack(size)
+            {
+                closure = new Closure(proto)
+            };
+        }
+
+        // 加载
+        public int Load(byte[] chunk, string chunkName, string mode)
+        {
+            var proto = Chunk.Undump(chunk);
+            stack.Push(new Closure(proto));
+
+            return 0;
+        }
+
+        // 调用函数
+        public void Call(int nArgs, int nResults)
+        {
+            var v = stack.Get(-(nArgs + 1));
+            if (v.IsFunction())
+            {
+                Closure closure = v.GetFunction();
+                Console.WriteLine($"call {closure.proto.source}[{closure.proto.lineDefined}, {closure.proto.lastLineDefined}]");
+                CallLuaClosure(nArgs, nResults, closure);
+            }
+            else
+            {
+                Error.Commit("not function!");
+            }
+        }
+
+        // 调用Lua闭包
+        private void CallLuaClosure(int nArgs, int nResults, Closure closure)
+        {
+            var nRegs = (int)closure.proto.maxStackSize;
+            var nParams = (int)closure.proto.numParams;
+            var isVararg = closure.proto.isVararg == 1;
+
+            // create new lua stack
+            var newStack = new LuaStack(nRegs + 20);
+            newStack.closure = closure;
+
+            // pass args, pop func
+            var funcAndArgs = stack.PopN(nArgs + 1);
+            newStack.PushN(funcAndArgs.Skip(1).ToArray(), nParams);
+            newStack.top = nRegs;
+            if (nArgs > nParams && isVararg)
+            {
+                newStack.varargs = funcAndArgs.Skip(nParams + 1).ToArray();
+            }
+
+            // run closure
+            PushLuaStack(newStack);
+            RunLuaClosure();
+            PopLuaStack();
+
+            // return results
+            if (nResults != 0)
+            {
+                var results = newStack.PopN(newStack.top - nRegs);
+                stack.Check(results.Length);
+                stack.PushN(results, nResults);
+            }
+        }
+
+        // 运行Lua闭包
+        private void RunLuaClosure()
+        {
+            while (true)
+            {
+                var inst = new Instruction(Fetch());
+                inst.Execute(this);
+
+                if (inst.OpCode() == OperationCodes.OP_RETURN) break;
+            }
+        }
+
+        // 
+        public void LoadProto(int idx)
+        {
+            var proto = stack.closure.proto.protos[idx];
+            var closure = new Closure(proto);
+            stack.Push(closure);
+        }
+
+        // 加载可变参数
+        public void LoadVararg(int n)
+        {
+            if (n < 0)
+            {
+                n = stack.varargs.Length;
+            }
+
+            stack.Check(n);
+            stack.PushN(stack.varargs, n);
         }
 
         // 获取栈顶索引值
@@ -153,6 +249,21 @@ namespace LuaVM.Net.Core
             stack.Set(idx, value);
         }
 
+        // 压入调用栈
+        private void PushLuaStack(LuaStack stack)
+        {
+            stack.prev = this.stack;
+            this.stack = stack;
+        }
+
+        // 弹出调用栈
+        private void PopLuaStack()
+        {
+            var stack = this.stack;
+            this.stack = stack.prev;
+            stack.prev = null;
+        }
+
         // 获取类型名字
         public string TypeName(int type)
         {
@@ -267,8 +378,7 @@ namespace LuaVM.Net.Core
             if (value.type == LuaType.LUA_TSTRING)
             {
                 var s = value.GetString();
-                double n = 0.0;
-                if (double.TryParse(s, out n))
+                if (double.TryParse(s, out double n))
                 {
                     return n;
                 }
@@ -297,8 +407,7 @@ namespace LuaVM.Net.Core
             if (value.type == LuaType.LUA_TSTRING)
             {
                 var s = value.GetString();
-                long n = 0;
-                if (long.TryParse(s, out n))
+                if (long.TryParse(s, out long n))
                 {
                     return n;
                 }
@@ -406,17 +515,22 @@ namespace LuaVM.Net.Core
             }
         }
 
+        public int PC()
+        {
+            return stack.pc;
+        }
+
         // 增加PC
         public void AddPC(int n)
         {
-            pc += n;
+            stack.pc += n;
         }
 
         // 取出当前指令，并将PC指向下一条指令
         public uint Fetch()
         {
-            var inst = proto.code[pc];
-            pc++;
+            var inst = proto.code[stack.pc];
+            stack.pc++;
             return inst;
         }
 
@@ -449,6 +563,67 @@ namespace LuaVM.Net.Core
             {
                 PushX(rk + 1);
             }
+        }
+
+        // 获取寄存器数量
+        public int registerCount
+        {
+            get { return proto.maxStackSize; }
+        }
+
+        public void CreateTable(int nArr, int nMap)
+        {
+            var t = new LuaTable(nArr, nMap);
+            stack.Push(t);
+        }
+
+        public int GetTable(int idx)
+        {
+            var t = stack.Get(idx);
+            var k = stack.Pop();
+            return GetTable(t, k);
+        }
+
+        private int GetTable(LuaValue t, LuaValue k)
+        {
+            if (t.IsTable())
+            {
+                var v = t.GetTable().Get(k);
+                stack.Push(v);
+
+                return v.type;
+            }
+
+            Error.Commit("not a table!");
+            return LuaType.LUA_TNONE;
+        }
+
+        public void SetTable(int idx)
+        {
+            var v = stack.Pop();
+            var k = stack.Pop();
+            SetTable(idx, k, v);
+        }
+
+        void SetTable(int idx, LuaValue k, LuaValue v)
+        {
+            var t = stack.Get(idx);
+            if (t.IsTable())
+            {
+                var table = t.GetTable();
+                table.Set(k, v);
+                stack.Set(idx, table);
+                return;
+            }
+
+            Error.Commit("not a table!");
+        }
+
+        public void SetI(int idx, long n)
+        {
+            var k = new LuaValue(n);
+            var v = stack.Pop();
+            SetTable(idx, k, v);
         }
     }
 }

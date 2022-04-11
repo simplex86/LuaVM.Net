@@ -185,7 +185,7 @@ namespace LuaVM.Net.Core
                 case ChunkValues.TAG_NUMBER:    return ReadLuaNumber();
                 case ChunkValues.TAG_SHORT_STR: return ReadString();
                 case ChunkValues.TAG_LONG_STR:  return ReadString();
-                default: throw new Exception("corrupted!");
+                default: Error.Commit("corrupted!"); return null;
             }
         }
 

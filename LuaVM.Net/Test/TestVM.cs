@@ -32,7 +32,7 @@ namespace LuaVM.Net
 
             while (true)
             {
-                var pc = ls.pc;
+                var pc = ls.PC();
                 var inst = new Instruction(ls.Fetch());
                 var code = inst.OpCode();
 

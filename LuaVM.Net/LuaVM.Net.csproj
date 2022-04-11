@@ -77,6 +77,7 @@
     <Compile Include="Core\Parser\Internals\StatementParsers\WhileStatementParser.cs" />
     <Compile Include="Core\Parser\Parser.cs" />
     <Compile Include="Core\VM\Api\Internals\Arithmetic.cs" />
+    <Compile Include="Core\VM\Api\Internals\Closure.cs" />
     <Compile Include="Core\VM\Api\Internals\Compare.cs" />
     <Compile Include="Core\VM\Api\Internals\Number.cs" />
     <Compile Include="Core\VM\Api\LuaStack.cs" />
