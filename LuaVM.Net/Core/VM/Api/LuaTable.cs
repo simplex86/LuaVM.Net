@@ -34,7 +34,7 @@ namespace LuaVM.Net.Core
         {
             if (key.IsInteger())
             {
-                var i = key.GetInteger() - 1;
+                var i = (int)key.GetInteger() - 1;
                 if (i >= 0 && i < arr.Count)
                 {
                     return arr[(int)i];
@@ -76,10 +76,10 @@ namespace LuaVM.Net.Core
                 var i = (int)key.GetInteger();
                 if (i > 0)
                 {
-                    var len = arr.Count;
+                    var len = (arr == null) ? 0 : arr.Count;
                     if (i <= len)
                     {
-                        arr[i] = val;
+                        arr[i - 1] = val;
                         if (i == len && val.IsNil())
                         {
                             ShrinkArray();

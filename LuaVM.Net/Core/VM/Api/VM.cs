@@ -642,6 +642,18 @@ namespace LuaVM.Net.Core
             }
         }
 
+        internal static void GetTabUp(Instruction i, LuaState ls)
+        {
+            var t = i.ABC();
+            var a = t.Item1 + 1;
+            var c = t.Item3;
+
+            ls.PushGlobalTable();
+            ls.PushRK(c);
+            ls.GetTable(-2);
+            ls.Replace(a);
+            ls.Pop(1);
+        }
 
         // 对暂未实现的指令，可以先执行此函数，以求编译通过编译测试已实现的指令函数
         internal static void Func(Instruction i, LuaState ls)

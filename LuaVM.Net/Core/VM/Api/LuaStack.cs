@@ -11,8 +11,9 @@ namespace LuaVM.Net.Core
         internal Closure closure { get; set; }
         internal LuaValue[] varargs { get; set; }
         internal int pc { get; set; } = 0;
+        internal LuaState state { get; set; }
 
-        internal LuaStack(int n)
+        internal LuaStack(int n, LuaState state)
         {
             slots = new List<LuaValue>(n);
             for (int i=0; i<n; i++)
@@ -20,6 +21,8 @@ namespace LuaVM.Net.Core
                 slots.Add(null);
             }
             top = 0;
+
+            this.state = state;
         }
 
         // 检查栈是否可容纳n个数据，如果容纳不了则扩容
@@ -175,6 +178,12 @@ namespace LuaVM.Net.Core
         // 设置指定索引位置的值
         internal void Set(int idx, LuaValue value)
         {
+            if (idx == Consts.LUA_REGISTRYINDEX)
+            {
+                state.registry = value.GetTable();
+                return;
+            }
+
             idx = GetAbsIndex(idx);
             if (idx <= 0 || idx > top)
             {
@@ -186,6 +195,11 @@ namespace LuaVM.Net.Core
         // 获取指定索引位置的值
         internal LuaValue Get(int idx)
         {
+            if (idx == Consts.LUA_REGISTRYINDEX)
+            {
+                return new LuaValue(state.registry);
+            }
+
             idx = GetAbsIndex(idx);
             if (idx > 0 && idx <= top)
             {
@@ -198,6 +212,11 @@ namespace LuaVM.Net.Core
         // 判断索引是否有效
         internal bool IsValid(int idx)
         {
+            if (idx == Consts.LUA_REGISTRYINDEX)
+            {
+                return true;
+            }
+
             idx = GetAbsIndex(idx);
             return idx > 0 && idx <= top;
         }
@@ -216,7 +235,11 @@ namespace LuaVM.Net.Core
         // 获取（正数）索引值
         internal int GetAbsIndex(int idx)
         {
-            return (idx > 0) ? idx : idx + top + 1;
+            if (idx >= 0 || idx < Consts.LUA_REGISTRYINDEX)
+            {
+                return idx;
+            }
+            return idx + top + 1;
         }
 
         // 栈顶索引值

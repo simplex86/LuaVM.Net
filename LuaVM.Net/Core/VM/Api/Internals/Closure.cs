@@ -6,13 +6,19 @@ using System.Threading.Tasks;
 
 namespace LuaVM.Net.Core
 {
-    class Closure
+    public class Closure
     {
-        public Prototype proto { get; set; }
+        public Prototype proto { get; private set; }
+        public CSharpFunction func { get; private set; }
 
         public Closure(Prototype proto)
         {
             this.proto = proto;
+        }
+
+        public Closure(CSharpFunction func)
+        {
+            this.func = func;
         }
     }
 }

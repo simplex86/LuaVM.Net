@@ -4,6 +4,8 @@ using System.Linq;
 
 namespace LuaVM.Net.Core
 {
+    public delegate int CSharpFunction(LuaState luaState);
+
     public class LuaState
     {
         private LuaStack stack;
@@ -13,22 +15,46 @@ namespace LuaVM.Net.Core
             get { return stack.closure.proto; }
         }
 
+        internal LuaTable registry { get; set; }
+
         public LuaState()
+            : this(Consts.LUA_MIN_STACK)
         {
-            stack = new LuaStack(32);
+
         }
 
         public LuaState(int size)
         {
-            stack = new LuaStack(size);
+            stack = new LuaStack(size, this);
+
+            registry = new LuaTable(0, 0);
+            var k = new LuaValue(Consts.LUA_RIDX_GLOBALS);
+            var v = new LuaValue(new LuaTable(0, 0));
+            registry.Set(k, v);
+
+            PushLuaStack(new LuaStack(Consts.LUA_MIN_STACK, this));
+            RegisterGlobals();
         }
 
         public LuaState(int size, Prototype proto)
         {
-            stack = new LuaStack(size)
+            stack = new LuaStack(size, this)
             {
                 closure = new Closure(proto)
             };
+
+            registry = new LuaTable(0, 0);
+            var k = new LuaValue(Consts.LUA_RIDX_GLOBALS);
+            var v = new LuaValue(new LuaTable(0, 0));
+            registry.Set(k, v);
+
+            PushLuaStack(new LuaStack(Consts.LUA_MIN_STACK, this));
+            RegisterGlobals();
+        }
+
+        private void RegisterGlobals()
+        {
+            Register("print", Global.lua_Print);
         }
 
         // 加载
@@ -47,8 +73,14 @@ namespace LuaVM.Net.Core
             if (v.IsFunction())
             {
                 Closure closure = v.GetFunction();
-                Console.WriteLine($"call {closure.proto.source}[{closure.proto.lineDefined}, {closure.proto.lastLineDefined}]");
-                CallLuaClosure(nArgs, nResults, closure);
+                if (closure.func != null)
+                {
+                    CallCSharpeFunction(nArgs, nResults, closure);
+                }
+                else
+                {
+                    CallLuaClosure(nArgs, nResults, closure);
+                }
             }
             else
             {
@@ -64,8 +96,10 @@ namespace LuaVM.Net.Core
             var isVararg = closure.proto.isVararg == 1;
 
             // create new lua stack
-            var newStack = new LuaStack(nRegs + 20);
-            newStack.closure = closure;
+            var newStack = new LuaStack(nRegs + Consts.LUA_MIN_STACK, this)
+            {
+                closure = closure
+            };
 
             // pass args, pop func
             var funcAndArgs = stack.PopN(nArgs + 1);
@@ -99,6 +133,33 @@ namespace LuaVM.Net.Core
                 inst.Execute(this);
 
                 if (inst.OpCode() == OperationCodes.OP_RETURN) break;
+            }
+        }
+
+        private void CallCSharpeFunction(int nArgs, int nResults, Closure closure)
+        {
+            // create new lua stack
+            var newStack = new LuaStack(nArgs + Consts.LUA_MIN_STACK, this)
+            {
+                closure = closure
+            };
+
+            // pass args, pop func
+            var args = stack.PopN(nArgs);
+            newStack.PushN(args, nArgs);
+            stack.Pop();
+
+            // run closure
+            PushLuaStack(newStack);
+            var rcount = closure.func(this);
+            PopLuaStack();
+
+            // return results
+            if (nResults != 0)
+            {
+                var results = newStack.PopN(rcount);
+                stack.Check(results.Length);
+                stack.PushN(results, nResults);
             }
         }
 
@@ -201,6 +262,12 @@ namespace LuaVM.Net.Core
         public void Push(string s)
         {
             stack.Push(s);
+        }
+
+        // 压入字符串
+        public void Push(Closure c)
+        {
+            stack.Push(c);
         }
 
         // 把指定位置的压入栈顶
@@ -306,7 +373,7 @@ namespace LuaVM.Net.Core
         }
 
         // 判断索引位置是否为none或nil
-        public bool IsNorneOrNil(int idx)
+        public bool IsNoneOrNil(int idx)
         {
             return IsNone(idx) || IsNil(idx);
         }
@@ -336,6 +403,18 @@ namespace LuaVM.Net.Core
         {
             var value = stack.Get(idx);
             return value.IsInteger();
+        }
+
+        public bool IsCSharpeFunction(int idx)
+        {
+            var value = stack.Get(idx);
+            if (value.IsFunction())
+            {
+                var closure = value.GetFunction();
+                return closure.func != null;
+            }
+
+            return false;
         }
 
         public bool ToBoolean(int idx)
@@ -440,6 +519,12 @@ namespace LuaVM.Net.Core
             }
 
             return string.Empty;
+        }
+
+        public Closure ToFunction(int idx)
+        {
+            var value = stack.Get(idx);
+            return value.GetFunction();
         }
 
         // 比较指定位置上的两个值
@@ -619,11 +704,53 @@ namespace LuaVM.Net.Core
             Error.Commit("not a table!");
         }
 
+        void SetTable(LuaValue t, LuaValue k, LuaValue v)
+        {
+            if (t.IsTable())
+            {
+                var table = t.GetTable();
+                table.Set(k, v);
+                return;
+            }
+
+            Error.Commit("not a table!");
+        }
+
         public void SetI(int idx, long n)
         {
             var k = new LuaValue(n);
             var v = stack.Pop();
             SetTable(idx, k, v);
+        }
+
+        internal void Register(string name, CSharpFunction func)
+        {
+            Push(new Closure(func));
+            SetGlobal(name);
+        }
+
+        public void SetGlobal(string name)
+        {
+            var g = new LuaValue(Consts.LUA_RIDX_GLOBALS);
+            var t = registry.Get(g);
+            var k = new LuaValue(name);
+            var v = stack.Pop();
+            SetTable(t, k, v);
+            registry.Set(g, t);
+        }
+
+        public int GetGlobal(string name)
+        {
+            var k = new LuaValue(Consts.LUA_RIDX_GLOBALS);
+            var t = registry.Get(k);
+            return GetTable(t, new LuaValue(name));
+        }
+
+        public void PushGlobalTable()
+        {
+            var k = new LuaValue(Consts.LUA_RIDX_GLOBALS);
+            var global = registry.Get(k);
+            stack.Push(global);
         }
     }
 }

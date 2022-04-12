@@ -10,7 +10,7 @@ namespace LuaVM.Net
         {
             TestVM();
             // pause
-            Console.Write("\npress any key to be continue...");
+            Console.Write("press any key to be continue...");
             Console.ReadKey();
         }
 
@@ -52,7 +52,7 @@ namespace LuaVM.Net
         static void TestVM()
         {
             var test = new TestVM();
-            test.Do(@"Luas\04.out");
+            test.Do(@"Luas\05.out");
         }
 
         static void TestTable()

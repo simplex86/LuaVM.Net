@@ -79,6 +79,7 @@
     <Compile Include="Core\VM\Api\Internals\Arithmetic.cs" />
     <Compile Include="Core\VM\Api\Internals\Closure.cs" />
     <Compile Include="Core\VM\Api\Internals\Compare.cs" />
+    <Compile Include="Core\VM\Api\Internals\Global.cs" />
     <Compile Include="Core\VM\Api\Internals\Number.cs" />
     <Compile Include="Core\VM\Api\LuaStack.cs" />
     <Compile Include="Core\VM\Api\LuaState.cs" />

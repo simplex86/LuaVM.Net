@@ -181,7 +181,7 @@ namespace LuaVM.Net.Core
             new OperationCode(0, 1, OperationArgs.U, OperationArgs.U, InstructionMode.IABC,  "LOADBOOL", VM.LoadBoolean),
             new OperationCode(0, 1, OperationArgs.U, OperationArgs.N, InstructionMode.IABC,  "LOADNIL ", VM.LoadNil),
             new OperationCode(0, 1, OperationArgs.U, OperationArgs.N, InstructionMode.IABC,  "GETUPVAL", VM.Func),
-            new OperationCode(0, 1, OperationArgs.U, OperationArgs.K, InstructionMode.IABC,  "GETTABUP", VM.Func),
+            new OperationCode(0, 1, OperationArgs.U, OperationArgs.K, InstructionMode.IABC,  "GETTABUP", VM.GetTabUp),
             new OperationCode(0, 1, OperationArgs.R, OperationArgs.K, InstructionMode.IABC,  "GETTABLE", VM.GetTable),
             new OperationCode(0, 0, OperationArgs.K, OperationArgs.K, InstructionMode.IABC,  "SETTABUP", VM.Func),
             new OperationCode(0, 0, OperationArgs.U, OperationArgs.N, InstructionMode.IABC,  "SETUPVAL", VM.Func),
@@ -233,15 +233,23 @@ namespace LuaVM.Net.Core
     // 数据类型
     internal static class LuaType
     {
-        public const int LUA_TNONE = -1; // no value
-        public const int LUA_TNIL = 0;
-        public const int LUA_TBOOLEAN = 1;
+        public const int LUA_TNONE          = -1; // no value
+        public const int LUA_TNIL           = 0;
+        public const int LUA_TBOOLEAN       = 1;
         public const int LUA_TLIGHTUSERDATA = 2;
-        public const int LUA_TNUMBER = 3;
-        public const int LUA_TSTRING = 4;
-        public const int LUA_TTABLE = 5;
-        public const int LUA_TFUNCTION = 6;
-        public const int LUA_TUSERDATA = 7;
-        public const int LUA_TTHREAD = 8;
+        public const int LUA_TNUMBER        = 3;
+        public const int LUA_TSTRING        = 4;
+        public const int LUA_TTABLE         = 5;
+        public const int LUA_TFUNCTION      = 6;
+        public const int LUA_TUSERDATA      = 7;
+        public const int LUA_TTHREAD        = 8;
+    }
+
+    internal static class Consts
+    {
+        public const int LUA_MIN_STACK    = 20;
+        public const int LUA_MAX_STACK = 1000000;
+        public const int LUA_REGISTRYINDEX = -LUA_MAX_STACK - 1000;
+        public const int LUA_RIDX_GLOBALS   = 2;
     }
 }
