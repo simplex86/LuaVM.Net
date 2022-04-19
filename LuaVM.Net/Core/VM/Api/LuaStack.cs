@@ -5,13 +5,14 @@ namespace LuaVM.Net.Core
 {
     internal class LuaStack
     {
-        private List<LuaValue> slots;
+        internal List<LuaValue> slots;
 
         internal LuaStack prev { get; set; }
         internal Closure closure { get; set; }
         internal LuaValue[] varargs { get; set; }
         internal int pc { get; set; } = 0;
         internal LuaState state { get; set; }
+        internal Dictionary<int, Upvalue> openuvs { get; set; }
 
         internal LuaStack(int n, LuaState state)
         {
@@ -178,10 +179,14 @@ namespace LuaVM.Net.Core
         // 设置指定索引位置的值
         internal void Set(int idx, LuaValue value)
         {
-            if (idx == Consts.LUA_REGISTRYINDEX)
+            if (idx < Consts.LUA_REGISTRY_INDEX)
             {
-                state.registry = value.GetTable();
-                return;
+                var nidx = Consts.LUA_REGISTRY_INDEX - idx - 1;
+                if (closure != null && nidx < closure.upvalues.Length)
+                {
+                    closure.upvalues[nidx].value = value;
+                    return;
+                }
             }
 
             idx = GetAbsIndex(idx);
@@ -195,7 +200,17 @@ namespace LuaVM.Net.Core
         // 获取指定索引位置的值
         internal LuaValue Get(int idx)
         {
-            if (idx == Consts.LUA_REGISTRYINDEX)
+            if (idx < Consts.LUA_REGISTRY_INDEX)
+            {
+                idx = Consts.LUA_REGISTRY_INDEX - idx - 1;
+                if (closure == null || idx >= closure.upvalues.Length)
+                {
+                    return null;
+                }
+                return closure.upvalues[idx].value;
+            }
+
+            if (idx == Consts.LUA_REGISTRY_INDEX)
             {
                 return new LuaValue(state.registry);
             }
@@ -212,9 +227,10 @@ namespace LuaVM.Net.Core
         // 判断索引是否有效
         internal bool IsValid(int idx)
         {
-            if (idx == Consts.LUA_REGISTRYINDEX)
+            if (idx < Consts.LUA_REGISTRY_INDEX)
             {
-                return true;
+                idx = Consts.LUA_REGISTRY_INDEX - idx - 1;
+                return (closure != null) && (idx < closure.upvalues.Length);
             }
 
             idx = GetAbsIndex(idx);
@@ -235,7 +251,7 @@ namespace LuaVM.Net.Core
         // 获取（正数）索引值
         internal int GetAbsIndex(int idx)
         {
-            if (idx >= 0 || idx < Consts.LUA_REGISTRYINDEX)
+            if (idx >= 0 || idx < Consts.LUA_REGISTRY_INDEX)
             {
                 return idx;
             }

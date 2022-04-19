@@ -9,9 +9,9 @@ namespace LuaVM.Net.Core
         // A B      R(A) := R(B)
         internal static void Move(Instruction i, LuaState ls)
         {
-            var t = i.ABC();
-            var a = t.Item1 + 1;
-            var b = t.Item2 + 1;
+            var (a, b, c) = i.ABC();
+            a += 1;
+            b += 1;
             ls.Copy(b, a);
         }
 
@@ -19,14 +19,12 @@ namespace LuaVM.Net.Core
         // sBx      pc += sBx
         internal static void Jump(Instruction i, LuaState ls)
         {
-            var t = i.AsBx();
-            var a = t.Item1;
-            var b = t.Item2;
+            var (a, b) = i.AsBx();
 
             ls.AddPC(b);
             if (a != 0)
             {
-                Error.Commit("todo");
+                ls.CloseUpvalues(a);
             }
         }
 
@@ -34,9 +32,8 @@ namespace LuaVM.Net.Core
         // A B      R(A), R(A+1), ..., R(A+B) := nil
         internal static void LoadNil(Instruction i, LuaState ls)
         {
-            var t = i.ABC();
-            var a = t.Item1 + 1;
-            var b = t.Item2;
+            var (a, b, c) = i.ABC();
+            a += 1;
 
             ls.Push();
 
@@ -51,10 +48,8 @@ namespace LuaVM.Net.Core
         // A B C    R(A) := (Bool)B; if(C) pc++
         internal static void LoadBoolean(Instruction i, LuaState ls)
         {
-            var t = i.ABC();
-            var a = t.Item1 + 1;
-            var b = t.Item2;
-            var c = t.Item3;
+            var(a, b, c) = i.ABC();
+            a += 1;
 
             ls.Push(b != 0);
             ls.Replace(a);
@@ -68,9 +63,8 @@ namespace LuaVM.Net.Core
         // A Bx     R(A) := Kst(Bx)
         internal static void LoadK(Instruction i, LuaState ls)
         {
-            var t = i.ABx();
-            var a = t.Item1 + 1;
-            var b = t.Item2;
+            var (a, b) = i.ABx();
+            a += 1;
 
             ls.PushConst(b);
             ls.Replace(a);
@@ -92,9 +86,9 @@ namespace LuaVM.Net.Core
         // 一元运算
         private static void UnaryOp(Instruction i, LuaState ls, int op)
         {
-            var t = i.ABC();
-            var a = t.Item1 + 1;
-            var b = t.Item2 + 1;
+            var (a, b, c) = i.ABC();
+            a += 1;
+            b += 1;
 
             ls.PushX(b);
             ls.Arithmetic(op);
@@ -104,10 +98,8 @@ namespace LuaVM.Net.Core
         // 二元运算
         private static void BinaryOp(Instruction i, LuaState ls, int op)
         {
-            var t = i.ABC();
-            var a = t.Item1 + 1;
-            var b = t.Item2;
-            var c = t.Item3;
+            var (a, b, c) = i.ABC();
+            a += 1;
 
             ls.PushRK(b);
             ls.PushRK(c);
@@ -217,9 +209,9 @@ namespace LuaVM.Net.Core
         // A B	    R(A) := length of R(B)
         internal static void Len(Instruction i, LuaState ls)
         {
-            var t = i.ABC();
-            var a = t.Item1 + 1;
-            var b = t.Item2 + 1;
+            var (a, b, c) = i.ABC();
+            a += 1;
+            b += 1;
 
             ls.Len(b);
             ls.Replace(a);
@@ -229,10 +221,10 @@ namespace LuaVM.Net.Core
         // A B C	R(A) := R(B).. ... ..R(C)
         internal static void Concat(Instruction i, LuaState ls)
         {
-            var t = i.ABC();
-            var a = t.Item1 + 1;
-            var b = t.Item2 + 1;
-            var c = t.Item3 + 1;
+            var (a, b, c) = i.ABC();
+            a += 1;
+            b += 1;
+            c += 1;
 
             var n = c - b + 1;
             ls.Check(n);
@@ -249,10 +241,7 @@ namespace LuaVM.Net.Core
         // 比较
         private static void Compare(Instruction i, LuaState ls, int op)
         {
-            var abc = i.ABC();
-            var a = abc.Item1;
-            var b = abc.Item2;
-            var c = abc.Item3;
+            var (a, b, c) = i.ABC();
 
             ls.PushRK(b);
             ls.PushRK(c);
@@ -289,9 +278,9 @@ namespace LuaVM.Net.Core
         // A B	    R(A) := not R(B)
         internal static void Not(Instruction i, LuaState ls)
         {
-            var t = i.ABC();
-            var a = t.Item1 + 1;
-            var b = t.Item2 + 1;
+            var (a, b, c) = i.ABC();
+            a += 1;
+            b += 1;
 
             ls.Push(!ls.ToBoolean(b));
             ls.Replace(a);
@@ -301,9 +290,8 @@ namespace LuaVM.Net.Core
         // A C	    if not (R(A) <=> C) then pc++
         internal static void Test(Instruction i, LuaState ls)
         {
-            var t = i.ABC();
-            var a = t.Item1 + 1;
-            var c = t.Item3;
+            var (a, b, c) = i.ABC();
+            a += 1;
 
             if (ls.ToBoolean(a) != (c != 0))
             {
@@ -315,10 +303,9 @@ namespace LuaVM.Net.Core
         // A B C	if (R(B) <=> C) then R(A) := R(B) else pc++
         internal static void TestSet(Instruction i, LuaState ls)
         {
-            var t = i.ABC();
-            var a = t.Item1 + 1;
-            var b = t.Item2 + 1;
-            var c = t.Item3;
+            var (a, b, c) = i.ABC();
+            a += 1;
+            b += 1;
 
             if (ls.ToBoolean(b) == (c != 0))
             {
@@ -334,9 +321,8 @@ namespace LuaVM.Net.Core
         // A sBx	R(A) -= R(A+2); pc += sBx
         internal static void ForPrep(Instruction i, LuaState ls)
         {
-            var t = i.AsBx();
-            var a = t.Item1 + 1;
-            var b = t.Item2;
+            var (a, b) = i.AsBx();
+            a += 1;
 
             ls.PushX(a);
             ls.PushX(a + 2);
@@ -349,9 +335,8 @@ namespace LuaVM.Net.Core
         // A sBx	if R(A+1) ~= nil then { R(A) = R(A+1); pc += sBx }
         internal static void ForLoop(Instruction i, LuaState ls)
         {
-            var t = i.AsBx();
-            var a = t.Item1 + 1;
-            var b = t.Item2;
+            var (a, b) = i.AsBx();
+            a += 1;
 
             // R(A)+=R(A+2);
             ls.PushX(a + 2);
@@ -373,9 +358,8 @@ namespace LuaVM.Net.Core
         // R(A) := closure(KPROTO[Bx])
         internal static void Closure(Instruction i, LuaState ls)
         {
-            var t = i.ABx();
-            var a = t.Item1 + 1;
-            var b = t.Item2;
+            var (a, b) = i.ABx();
+            a += 1;
 
             ls.LoadProto(b);
             ls.Replace(a);
@@ -385,12 +369,9 @@ namespace LuaVM.Net.Core
         // R(A), ... ,R(A+C-2) := R(A)(R(A+1), ... ,R(A+B-1))
         internal static void Call(Instruction i, LuaState ls)
         {
-            var t = i.ABC();
-            var a = t.Item1 + 1;
-            var b = t.Item2;
-            var c = t.Item3;
-
-            // println(":::"+ vm.StackToString())
+            var (a, b, c) = i.ABC();
+            a += 1;
+            
             var nArgs = PushFuncAndArgs(a, b, ls);
             ls.Call(nArgs, c - 1);
             PopResults(a, c, ls);
@@ -400,9 +381,8 @@ namespace LuaVM.Net.Core
         // return R(A), ... ,R(A+B-2)
         internal static void Return(Instruction i, LuaState ls)
         {
-            var t = i.ABC();
-            var a = t.Item1 + 1;
-            var b = t.Item2;
+            var (a, b, _) = i.ABC();
+            a += 1;
 
             if (b == 1)
             {
@@ -427,9 +407,8 @@ namespace LuaVM.Net.Core
         // R(A), R(A+1), ..., R(A+B-2) = vararg
         internal static void Vararg(Instruction i, LuaState ls)
         {
-            var t = i.ABC();
-            var a = t.Item1 + 1;
-            var b = t.Item2;
+            var (a, b, _) = i.ABC();
+            a += 1;
 
             if (b != 1)
             {
@@ -443,9 +422,8 @@ namespace LuaVM.Net.Core
         // return R(A)(R(A+1), ... ,R(A+B-1))
         internal static void TailCall(Instruction i, LuaState ls)
         {
-            var t = i.ABC();
-            var a = t.Item1 + 1;
-            var b = t.Item2;
+            var (a, b, _) = i.ABC();
+            a += 1;
 
             // TODO XH: optimize tail call!
             var c = 0;
@@ -457,10 +435,9 @@ namespace LuaVM.Net.Core
         // R(A+1) := R(B); R(A) := R(B)[RK(C)]
         internal static void Self(Instruction i, LuaState ls)
         {
-            var t = i.ABC();
-            var a = t.Item1 + 1;
-            var b = t.Item2 + 1;
-            var c = t.Item3;
+            var (a, b, c) = i.ABC();
+            a += 1;
+            b += 1;
 
             ls.Copy(b, a + 1);
             ls.PushRK(c);
@@ -522,10 +499,8 @@ namespace LuaVM.Net.Core
 
         internal static void NewTable(Instruction i, LuaState ls)
         {
-            var t = i.ABC();
-            var a = t.Item1 + 1;
-            var b = t.Item2;
-            var c = t.Item3;
+            var (a, b, c) = i.ABC();
+            a += 1;
  
             ls.CreateTable(Int2Fb(b), Fb2Int(c));
             ls.Replace(a);
@@ -568,13 +543,10 @@ namespace LuaVM.Net.Core
 
         internal static void GetTable(Instruction i, LuaState ls)
         {
-            var t = i.ABC();
-            var a = t.Item1;
-            var b = t.Item2;
-            var c = t.Item3;
-
+            var (a, b, c) = i.ABC();
             a += 1;
             b += 1;
+
             ls.PushRK(c);
             ls.GetTable(b);
             ls.Replace(a);
@@ -582,11 +554,7 @@ namespace LuaVM.Net.Core
 
         internal static void SetTable(Instruction i, LuaState ls)
         {
-            var t = i.ABC();
-            var a = t.Item1;
-            var b = t.Item2;
-            var c = t.Item3;
-
+            var (a, b, c) = i.ABC();
             a += 1;
 
             ls.PushRK(b);
@@ -598,10 +566,8 @@ namespace LuaVM.Net.Core
 
         internal static void SetList(Instruction i, LuaState ls)
         {
-            var t = i.ABC();
-            var a = t.Item1 + 1;
-            var b = t.Item2;
-            var c = t.Item3;
+            var (a, b, c) = i.ABC();
+            a += 1;
 
             if (c > 0)
             {
@@ -642,17 +608,60 @@ namespace LuaVM.Net.Core
             }
         }
 
+        //internal static void GetTabUp(Instruction i, LuaState ls)
+        //{
+        //    var t = i.ABC();
+        //    var a = t.Item1 + 1;
+        //    var c = t.Item3;
+
+        //    ls.PushGlobalTable();
+        //    ls.PushRK(c);
+        //    ls.GetTable(-2);
+        //    ls.Replace(a);
+        //    ls.Pop(1);
+        //}
+
+        internal static void GetUpval(Instruction i, LuaState ls)
+        {
+            var (a, b, _) = i.ABC();
+            a += 1;
+            b += 1;
+
+            ls.Copy(LuaState.LuaUpvalueIndex(b), a);
+        }
+
+
+        // UpValue[B] := R(A)
+        internal static void SetUpval(Instruction i, LuaState ls)
+        {
+            var (a, b, _) = i.ABC();
+            a += 1;
+            b += 1;
+
+            ls.Copy(a, LuaState.LuaUpvalueIndex(b));
+        }
+
+        // R(A) := UpValue[B][RK(C)]
         internal static void GetTabUp(Instruction i, LuaState ls)
         {
-            var t = i.ABC();
-            var a = t.Item1 + 1;
-            var c = t.Item3;
+            var (a, b, c) = i.ABC();
+            a += 1;
+            b += 1;
 
-            ls.PushGlobalTable();
             ls.PushRK(c);
-            ls.GetTable(-2);
+            ls.GetTable(LuaState.LuaUpvalueIndex(b));
             ls.Replace(a);
-            ls.Pop(1);
+        }
+
+        // UpValue[A][RK(B)] := RK(C)
+        internal static void SetTabUp(Instruction i, LuaState ls)
+        {
+            var (a, b, c) = i.ABC();
+            a += 1;
+
+            ls.PushRK(b);
+            ls.PushRK(c);
+            ls.SetTable(LuaState.LuaUpvalueIndex(a));
         }
 
         // 对暂未实现的指令，可以先执行此函数，以求编译通过编译测试已实现的指令函数

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using LuaVM.Net.Core.Internal;
 
 namespace LuaVM.Net.Core
 {
@@ -61,7 +62,14 @@ namespace LuaVM.Net.Core
         public int Load(byte[] chunk, string chunkName, string mode)
         {
             var proto = Chunk.Undump(chunk);
-            stack.Push(new Closure(proto));
+            var closure = new Closure(proto);
+            stack.Push(closure);
+
+            if (proto.upvalues.Length > 0)
+            {
+                var env = registry.Get(new LuaValue(Consts.LUA_RIDX_GLOBALS));
+                closure.upvalues[0] = new Upvalue(env);
+            }
 
             return 0;
         }
@@ -169,6 +177,34 @@ namespace LuaVM.Net.Core
             var proto = stack.closure.proto.protos[idx];
             var closure = new Closure(proto);
             stack.Push(closure);
+
+            for (var i = 0; i < proto.upvalues.Length; i++)
+            {
+                var uvInfo = proto.upvalues[i];
+                var uvIdx = (int)uvInfo.idx;
+                if (uvInfo.instack == 1)
+                {
+                    if (stack.openuvs == null)
+                    {
+                        stack.openuvs = new Dictionary<int, Upvalue>();
+                    }
+
+                    if (stack.openuvs.ContainsKey(uvIdx))
+                    {
+                        var openuv = stack.openuvs[uvIdx];
+                        closure.upvalues[i] = openuv;
+                    }
+                    else
+                    {
+                        closure.upvalues[i] = new Upvalue(stack.slots[uvIdx]);
+                        stack.openuvs[uvIdx] = closure.upvalues[i];
+                    }
+                }
+                else
+                {
+                    closure.upvalues[i] = stack.closure.upvalues[uvIdx];
+                }
+            }
         }
 
         // 加载可变参数
@@ -268,6 +304,25 @@ namespace LuaVM.Net.Core
         public void Push(Closure c)
         {
             stack.Push(c);
+        }
+
+        //
+        public void Push(CSharpFunction func)
+        {
+            Push(new Closure(func, 0));
+        }
+
+        // 
+        public void Push(CSharpFunction func, int n)
+        {
+            var closure = new Closure(func, n);
+            for (var i = n; i > 0; i--)
+            {
+                var val = stack.Pop();
+                closure.upvalues[n - 1] = new Upvalue(val);
+            }
+
+            Push(closure);
         }
 
         // 把指定位置的压入栈顶
@@ -474,14 +529,9 @@ namespace LuaVM.Net.Core
 
         private long ToInteger(LuaValue value)
         {
-            if (value.IsFloat())
+            if (value.IsFloat() || value.IsInteger())
             {
                 return value.GetInteger();
-            }
-            if (value.IsInteger())
-            {
-                var n = value.GetFloat();
-                return (int)n;
             }
             if (value.type == LuaType.LUA_TSTRING)
             {
@@ -725,7 +775,7 @@ namespace LuaVM.Net.Core
 
         internal void Register(string name, CSharpFunction func)
         {
-            Push(new Closure(func));
+            Push(func);
             SetGlobal(name);
         }
 
@@ -751,6 +801,26 @@ namespace LuaVM.Net.Core
             var k = new LuaValue(Consts.LUA_RIDX_GLOBALS);
             var global = registry.Get(k);
             stack.Push(global);
+        }
+
+        // 获取upvalue的索引
+        public static int LuaUpvalueIndex(int i)
+        {
+            return Consts.LUA_REGISTRY_INDEX - i;
+        }
+
+        public void CloseUpvalues(int a)
+        {
+            for (var i = 0; i < stack.openuvs.Count; i++)
+            {
+                if (i >= a - 1)
+                {
+                    var openuv = stack.openuvs[i];
+                    var val = openuv.value;
+                    openuv.value = val;
+                    stack.openuvs.Remove(i);
+                }
+            }
         }
     }
 }

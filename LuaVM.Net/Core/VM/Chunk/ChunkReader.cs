@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Text;
 
-namespace LuaVM.Net.Core
+namespace LuaVM.Net.Core.Internal
 {
     public class ChunkReader
     {

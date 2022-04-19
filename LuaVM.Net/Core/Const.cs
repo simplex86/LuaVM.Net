@@ -180,11 +180,11 @@ namespace LuaVM.Net.Core
             new OperationCode(0, 1, OperationArgs.N, OperationArgs.N, InstructionMode.IABx,  "LOADKX  ", VM.LoadKx),
             new OperationCode(0, 1, OperationArgs.U, OperationArgs.U, InstructionMode.IABC,  "LOADBOOL", VM.LoadBoolean),
             new OperationCode(0, 1, OperationArgs.U, OperationArgs.N, InstructionMode.IABC,  "LOADNIL ", VM.LoadNil),
-            new OperationCode(0, 1, OperationArgs.U, OperationArgs.N, InstructionMode.IABC,  "GETUPVAL", VM.Func),
+            new OperationCode(0, 1, OperationArgs.U, OperationArgs.N, InstructionMode.IABC,  "GETUPVAL", VM.GetUpval),
             new OperationCode(0, 1, OperationArgs.U, OperationArgs.K, InstructionMode.IABC,  "GETTABUP", VM.GetTabUp),
             new OperationCode(0, 1, OperationArgs.R, OperationArgs.K, InstructionMode.IABC,  "GETTABLE", VM.GetTable),
-            new OperationCode(0, 0, OperationArgs.K, OperationArgs.K, InstructionMode.IABC,  "SETTABUP", VM.Func),
-            new OperationCode(0, 0, OperationArgs.U, OperationArgs.N, InstructionMode.IABC,  "SETUPVAL", VM.Func),
+            new OperationCode(0, 0, OperationArgs.K, OperationArgs.K, InstructionMode.IABC,  "SETTABUP", VM.SetTabUp),
+            new OperationCode(0, 0, OperationArgs.U, OperationArgs.N, InstructionMode.IABC,  "SETUPVAL", VM.SetUpval),
             new OperationCode(0, 0, OperationArgs.K, OperationArgs.K, InstructionMode.IABC,  "SETTABLE", VM.SetTable),
             new OperationCode(0, 1, OperationArgs.U, OperationArgs.U, InstructionMode.IABC,  "NEWTABLE", VM.NewTable),
             new OperationCode(0, 1, OperationArgs.R, OperationArgs.K, InstructionMode.IABC,  "SELF    ", VM.Self),
@@ -249,7 +249,7 @@ namespace LuaVM.Net.Core
     {
         public const int LUA_MIN_STACK    = 20;
         public const int LUA_MAX_STACK = 1000000;
-        public const int LUA_REGISTRYINDEX = -LUA_MAX_STACK - 1000;
+        public const int LUA_REGISTRY_INDEX = -LUA_MAX_STACK - 1000;
         public const int LUA_RIDX_GLOBALS   = 2;
     }
 }

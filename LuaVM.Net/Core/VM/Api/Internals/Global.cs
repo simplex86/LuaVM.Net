@@ -15,10 +15,6 @@ namespace LuaVM.Net.Core
                 {
                     text += "nil";
                 }
-                else if (ls.IsString(i))
-                {
-                    text += ls.ToString(i);
-                }
                 else if (ls.IsBoolean(i))
                 {
                     text += ls.ToBoolean(i).ToString();
@@ -30,6 +26,10 @@ namespace LuaVM.Net.Core
                 else if (ls.IsNumber(i))
                 {
                     text += ls.ToNumber(i).ToString();
+                }
+                else if (ls.IsString(i))
+                {
+                    text += ls.ToString(i);
                 }
                 else
                 {
